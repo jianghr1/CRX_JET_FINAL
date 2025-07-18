@@ -75,8 +75,8 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : MX_TRIG_Pin MZ1_TRIG_Pin MZ2_TRIG_Pin */
   GPIO_InitStruct.Pin = MX_TRIG_Pin|MZ1_TRIG_Pin|MZ2_TRIG_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : VSEL_C_Pin VSEL_D_Pin LEDR_Pin LEDG_Pin
@@ -90,8 +90,8 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : MS1_YW_Pin MS2_YW_Pin */
   GPIO_InitStruct.Pin = MS1_YW_Pin|MS2_YW_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : EN37V_Pin */
@@ -101,12 +101,22 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(EN37V_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : MS1_YWE9_Pin MS2_YWE10_Pin SW3_Pin SW2_Pin
-                           SW1_Pin */
-  GPIO_InitStruct.Pin = MS1_YWE9_Pin|MS2_YWE10_Pin|SW3_Pin|SW2_Pin
-                          |SW1_Pin;
+  /*Configure GPIO pin : N_CRC_FAIL_Pin */
+  GPIO_InitStruct.Pin = N_CRC_FAIL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(N_CRC_FAIL_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : JETTING_Pin */
+  GPIO_InitStruct.Pin = JETTING_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(JETTING_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : SW3_Pin SW2_Pin SW1_Pin */
+  GPIO_InitStruct.Pin = SW3_Pin|SW2_Pin|SW1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SDIO_CD_Pin */

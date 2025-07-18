@@ -58,11 +58,6 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define JETTING_FPGA_REPLY 16
-#define MOTOR_X_TRIG 16
-#define MOTOR_Z1_TRIG 32
-#define MOTOR_Z2_TRIG 64
-#define PUMP_YW1_TRIG 16
-#define PUMP_YW2_TRIG 32
 #define ALL_EMG_STOP 1
 #define ALL_PAUSE 2
 #define ALL_NEW_TASK 4
@@ -91,10 +86,10 @@ void Error_Handler(void);
 #define MS2_YW_GPIO_Port GPIOC
 #define EN37V_Pin GPIO_PIN_1
 #define EN37V_GPIO_Port GPIOB
-#define MS1_YWE9_Pin GPIO_PIN_9
-#define MS1_YWE9_GPIO_Port GPIOE
-#define MS2_YWE10_Pin GPIO_PIN_10
-#define MS2_YWE10_GPIO_Port GPIOE
+#define N_CRC_FAIL_Pin GPIO_PIN_9
+#define N_CRC_FAIL_GPIO_Port GPIOE
+#define JETTING_Pin GPIO_PIN_10
+#define JETTING_GPIO_Port GPIOE
 #define SW3_Pin GPIO_PIN_13
 #define SW3_GPIO_Port GPIOE
 #define SW2_Pin GPIO_PIN_14

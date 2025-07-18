@@ -104,8 +104,8 @@ void StartDefaultTask(void *argument);
 extern void StartMotorTask(void *argument);
 extern void StartPumpTask(void *argument);
 extern void StartVacTask(void *argument);
-extern void StarJettingTasktTask(void *argument);
-extern void StartHeaderTaskTask(void *argument);
+extern void StarJettingTask(void *argument);
+extern void StartHeaderTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -150,10 +150,10 @@ void MX_FREERTOS_Init(void) {
   vacTaskHandle = osThreadNew(StartVacTask, NULL, &vacTask_attributes);
 
   /* creation of jettingTask */
-  jettingTaskHandle = osThreadNew(StarJettingTasktTask, NULL, &jettingTask_attributes);
+  jettingTaskHandle = osThreadNew(StarJettingTask, NULL, &jettingTask_attributes);
 
   /* creation of headerTask */
-  headerTaskHandle = osThreadNew(StartHeaderTaskTask, NULL, &headerTask_attributes);
+  headerTaskHandle = osThreadNew(StartHeaderTask, NULL, &headerTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
