@@ -198,10 +198,32 @@ void StartDefaultTask(void *argument)
 		{
 			// Dispatch To Pump Thread
 			osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-		} else if (currentIntCommandPtr->code == G110)
+		} else if (currentIntCommandPtr->code >= 4 && currentIntCommandPtr->code <= 6)
+		{
+			// Dispatch To Motor Thread
+			osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
+		} else if (currentIntCommandPtr->code >= 7 && currentIntCommandPtr->code <= 8)
+		{
+			// Dispatch To Pump Thread
+			osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=20)
 		{
 			// Dispatch To Motor Thread
 			osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
+		} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=30)
+		{
+			// Dispatch To Motor Thread
+			osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
+		} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=41)
+		{
+			// Dispatch To Pump Thread
+			osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		} else if (currentIntCommandPtr->code >=50 && currentIntCommandPtr->code <=70)
+		{
+			// Query
+		} else if (currentIntCommandPtr->code == M171)
+		{
+			// Need to 
 		}
 		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 		
