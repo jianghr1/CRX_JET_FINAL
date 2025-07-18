@@ -444,7 +444,7 @@ void TMC_setCoolStep(TMC* self, uint16_t semin, uint8_t semax, uint8_t seup, uin
 void TMC_softEnable(TMC* self, bool enable);
 
 // Motion
-void TMC_stop(TMC* self);
+void TMC_reset(TMC* self);
 void TMC_moveTo(TMC* self, float absolute);
 void TMC_move(TMC* self, float relative);
 void TMC_wait_motor_stop(TMC* self);

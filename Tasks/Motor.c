@@ -5,7 +5,7 @@
 #include "TMC2209.h"
 
 #define MOTOR_X_MM_TO_ESTEP 5.305f
-osThreadId_t defaultTaskHandle;
+extern osThreadId_t defaultTaskHandle;
 
 void StartMotorTask(void* arg) {
 	while(1)
