@@ -4,8 +4,10 @@
 #include "Comm.h"
 #include "TMC2209.h"
 
-#define PUMP_CW_DIRECTION currentIntCommandPtr->param1*2-1
+#define PUMP_CW_DIRECTION (currentIntCommandPtr->param1*2-1)
 #define PUMP_ROTATE_EDEG 0.5556
+#define YW_TRIGGERED_LVL GPIO_PIN_RESET
+
 extern osThreadId_t defaultTaskHandle;
 extern TIM_HandleTypeDef htim2;
 
@@ -49,41 +51,43 @@ void StartPumpTask(void *argument) {
 			
 			// MS rotate until trigger
 			case M107: {
-				TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
-				TMC_move(TMC_MS1, 0xFFFF * PUMP_CW_DIRECTION);
-				osThreadFlagsWait(PUMP_YW1_TRIG, osFlagsWaitAny, osWaitForever);
-				TMC_reset(TMC_MS1);
+				if (HAL_GPIO_ReadPin(MS1_YW_GPIO_Port, MS1_YW_Pin) != YW_TRIGGERED_LVL) {
+					TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
+					TMC_move(TMC_MS1, 0xFFFF * PUMP_CW_DIRECTION);
+					TMC_wait_motor_stop(TMC_MS1);
+				}
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M108: {
-				TMC_setSpeed(TMC_MS2, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
-				TMC_move(TMC_MS2, 0xFFFF * PUMP_CW_DIRECTION);
-				osThreadFlagsWait(PUMP_YW2_TRIG, osFlagsWaitAny, osWaitForever);
-				TMC_reset(TMC_MS2);
+				if (HAL_GPIO_ReadPin(MS2_YW_GPIO_Port, MS2_YW_Pin) != YW_TRIGGERED_LVL) {
+					TMC_setSpeed(TMC_MS2, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
+					TMC_move(TMC_MS2, 0xFFFF * PUMP_CW_DIRECTION);
+					TMC_wait_motor_stop(TMC_MS2);
+				}				
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			
 			// MS ctrl
 			case M130: {
-				HAL_GPIO_WritePin(GPIOD, MS1_CTL_Pin, currentIntCommandPtr->param1);
+				HAL_GPIO_WritePin(MS1_CTL_GPIO_Port, MS1_CTL_Pin, currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M131: {
-				HAL_GPIO_WritePin(GPIOD, MS2_CTL_Pin, currentIntCommandPtr->param1);
+				HAL_GPIO_WritePin(MS2_CTL_GPIO_Port, MS2_CTL_Pin, currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			// VAC ctrl
 			case M132: {
-				HAL_GPIO_WritePin(GPIOD, VAC1_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
+				HAL_GPIO_WritePin(VAC1_CTL_GPIO_Port, VAC1_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M133: {
-				HAL_GPIO_WritePin(GPIOD, VAC2_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
+				HAL_GPIO_WritePin(VAC2_CTL_GPIO_Port, VAC2_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
@@ -94,7 +98,7 @@ void StartPumpTask(void *argument) {
 				break;
 			}
 			case M141: {
-				HAL_GPIO_WritePin(GPIOD, UVF_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
+				HAL_GPIO_WritePin(UVF_CTL_GPIO_Port, UVF_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
