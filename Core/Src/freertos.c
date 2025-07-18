@@ -31,6 +31,7 @@
 #include "Jetting.h"
 #include "Pump.h"
 #include "Vac.h"
+#include "TMC2209.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +51,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim9;
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -188,56 +190,76 @@ void StartDefaultTask(void *argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
+	uint32_t flag;
   /* Infinite loop */
   for(;;)
   {
 		// Wait For CDC Command
-    osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+    flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, 20);
 		// Emergemcy Stop Handling
 		if (currentState == GlobalStateEStop)
 		{
 			//TODO
+			HAL_GPIO_WritePin(MS1_CTL_GPIO_Port , MS1_CTL_Pin , GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(MS2_CTL_GPIO_Port , MS2_CTL_Pin , GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(VAC1_CTL_GPIO_Port, VAC1_CTL_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(VAC2_CTL_GPIO_Port, VAC2_CTL_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(UVF_CTL_GPIO_Port , UVF_CTL_Pin , GPIO_PIN_RESET);
+			htim2.Instance->CCR2 = 0;
+			htim9.Instance->CCR1 = 0;
+			TMC_softEnable(TMC_MX , false);
+			TMC_softEnable(TMC_MZ1, false);
+			TMC_softEnable(TMC_MZ2, false);
+			TMC_softEnable(TMC_VAC, false);
+			TMC_softEnable(TMC_MS1, false);
+			TMC_softEnable(TMC_MS2, false);
+			TMC_softEnable(TMC_QJ , false);
+			TMC_softEnable(TMC_FY , false);
+			
+			
 			continue;
 		}
-		currentIntCommandPtr = Comm_Fetch_Queue();
-		if (currentIntCommandPtr == 0)
+		if (flag & ALL_NEW_TASK)
 		{
-			// This Should Not Happen Unless EStop
-			continue;
+			currentIntCommandPtr = Comm_Fetch_Queue();
+			if (currentIntCommandPtr == 0)
+			{
+				// This Should Not Happen Unless EStop
+				continue;
+			}
+			if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
+			{
+				// Dispatch To Pump Thread
+				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+			} else if (currentIntCommandPtr->code >= 4 && currentIntCommandPtr->code <= 6)
+			{
+				// Dispatch To Motor Thread
+				osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
+			} else if (currentIntCommandPtr->code >= 7 && currentIntCommandPtr->code <= 8)
+			{
+				// Dispatch To Pump Thread
+				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+			} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=20)
+			{
+				// Dispatch To Motor Thread
+				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
+			} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=30)
+			{
+				// Dispatch To Motor Thread
+				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
+			} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=41)
+			{
+				// Dispatch To Pump Thread
+				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+			} else if (currentIntCommandPtr->code >=50 && currentIntCommandPtr->code <=70)
+			{
+				// Query
+			} else if (currentIntCommandPtr->code == M171)
+			{
+				// Need to 
+			}
+			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 		}
-		if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
-		{
-			// Dispatch To Pump Thread
-			osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-		} else if (currentIntCommandPtr->code >= 4 && currentIntCommandPtr->code <= 6)
-		{
-			// Dispatch To Motor Thread
-			osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
-		} else if (currentIntCommandPtr->code >= 7 && currentIntCommandPtr->code <= 8)
-		{
-			// Dispatch To Pump Thread
-			osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-		} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=20)
-		{
-			// Dispatch To Motor Thread
-			osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
-		} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=30)
-		{
-			// Dispatch To Motor Thread
-			osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
-		} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=41)
-		{
-			// Dispatch To Pump Thread
-			osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-		} else if (currentIntCommandPtr->code >=50 && currentIntCommandPtr->code <=70)
-		{
-			// Query
-		} else if (currentIntCommandPtr->code == M171)
-		{
-			// Need to 
-		}
-		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-		
   }
   /* USER CODE END StartDefaultTask */
 }
