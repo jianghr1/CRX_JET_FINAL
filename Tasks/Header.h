@@ -2,5 +2,5 @@
 #define _HEATER_H
 
 
-void StartHeaterTask(void *argument);
+void StartHeaderTask(void *argument);
 #endif//_HEATER_H

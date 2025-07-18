@@ -71,11 +71,25 @@ typedef enum {
 	GlobalStateEStop = 7,
 } GlobalState_t;
 
+typedef union {
+	struct {
+		uint8_t MX :1;
+		uint8_t MZ1:1;
+		uint8_t MZ2:1;
+		uint8_t YW1:1;
+		uint8_t YW2:1;
+		uint8_t SW1:1;
+		uint8_t SW2:1;
+		uint8_t SW3:1;
+	} bits;
+	uint8_t data;
+}TriggerState_t;
+
 typedef struct {
 	int32_t vac_pressure;
 	int16_t temperature;
-	uint16_t x_encoder_pos;
-	uint16_t trigger_state;
+	int16_t x_encoder_pos;
+	TriggerState_t trigger_state;
 	uint16_t motor_state;
 } GlobalInfo_t;
 
@@ -83,9 +97,9 @@ extern GlobalState_t currentState;
 extern GMCommand_t* currentIntCommandPtr;
 extern GlobalInfo_t globalInfo;
 
-void Comm_Init_Queue(); 
-GMCommand_t* Comm_Fetch_Queue();
-GMCommand_t* Comm_Put_Queue();
-void Comm_Put_Queue_CPLT();
+void Comm_Init_Queue(void); 
+GMCommand_t* Comm_Fetch_Queue(void);
+GMCommand_t* Comm_Put_Queue(void);
+void Comm_Put_Queue_CPLT(void);
 
 #endif//_COMM_H

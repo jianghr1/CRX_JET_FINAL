@@ -1,5 +1,6 @@
 #include "pressure.h"
 #include "cmsis_os.h"
+#include "Comm.h"
 
 HAL_StatusTypeDef Pressure_Init(I2C_HandleTypeDef *hi2c)
 {
@@ -10,8 +11,7 @@ HAL_StatusTypeDef Pressure_Init(I2C_HandleTypeDef *hi2c)
     return HAL_I2C_Mem_Write(hi2c, PRESSURE_I2C_ADDR, 0x30, I2C_MEMADD_SIZE_8BIT, &cmd, 1, 100);
 }
 
-
-HAL_StatusTypeDef Pressure_Read(I2C_HandleTypeDef *hi2c, Pressure_Data *data)
+HAL_StatusTypeDef Pressure_Read(I2C_HandleTypeDef *hi2c)
 {
 
     uint8_t pressure_buf[3];
@@ -25,19 +25,19 @@ HAL_StatusTypeDef Pressure_Read(I2C_HandleTypeDef *hi2c, Pressure_Data *data)
 
     pressure_adc = (pressure_buf[0] << 16) | (pressure_buf[1] << 8) | pressure_buf[2];
     if (pressure_adc & 0x800000)
-        data->pressure = ((int32_t)pressure_adc - 16777216) / (float)PRESSURE_K_VALUE;
+        globalInfo.vac_pressure = ((int32_t)pressure_adc - 16777216) / (float)PRESSURE_K_VALUE;
     else
-        data->pressure = pressure_adc / (float)PRESSURE_K_VALUE;
+        globalInfo.vac_pressure = pressure_adc / (float)PRESSURE_K_VALUE;
 
-    // Read temperature data
-    if (HAL_I2C_Mem_Read(hi2c, PRESSURE_I2C_ADDR, 0x09, I2C_MEMADD_SIZE_8BIT, temp_buf, 2, 100) != HAL_OK)
-        return HAL_ERROR;
+//    // Read temperature data
+//    if (HAL_I2C_Mem_Read(hi2c, PRESSURE_I2C_ADDR, 0x09, I2C_MEMADD_SIZE_8BIT, temp_buf, 2, 100) != HAL_OK)
+//        return HAL_ERROR;
 
-    temp_adc = (temp_buf[0] << 8) | temp_buf[1];
-    if (temp_adc & 0x8000)
-        data->temperature = ((int16_t)temp_adc - 65536) / 256.0f;
-    else
-        data->temperature = temp_adc / 256.0f;
+//    temp_adc = (temp_buf[0] << 8) | temp_buf[1];
+//    if (temp_adc & 0x8000)
+//        data->temperature = ((int16_t)temp_adc - 65536) / 256.0f;
+//    else
+//        data->temperature = temp_adc / 256.0f;
 
     return HAL_OK;
 }

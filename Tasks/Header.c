@@ -6,7 +6,7 @@
 extern osThreadId_t defaultTaskHandle;
 extern SPI_HandleTypeDef hspi1, hspi4;
 extern TIM_HandleTypeDef htim9;
-void StartHeaterTask(void *argument) {
+void StartHeaderTask(void *argument) {
 	static int32_t target_temperature = 0;
 	static int32_t heater_working = 0;
 	static int32_t integeral = 0;

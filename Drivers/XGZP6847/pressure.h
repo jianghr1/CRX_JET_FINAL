@@ -12,6 +12,6 @@ typedef struct {
 } Pressure_Data;
 
 HAL_StatusTypeDef Pressure_Init(I2C_HandleTypeDef *hi2c);
-HAL_StatusTypeDef Pressure_Read(I2C_HandleTypeDef *hi2c, Pressure_Data *data);
+HAL_StatusTypeDef Pressure_Read(I2C_HandleTypeDef *hi2c);
 
 #endif // PRESSURE_H
