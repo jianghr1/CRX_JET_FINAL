@@ -1,8 +1,8 @@
 crx_jet_final\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
-crx_jet_final\heap_4.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+crx_jet_final\heap_4.o: C:\applications\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 crx_jet_final\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-crx_jet_final\heap_4.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-crx_jet_final\heap_4.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+crx_jet_final\heap_4.o: C:\applications\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+crx_jet_final\heap_4.o: C:\applications\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 crx_jet_final\heap_4.o: ../Core/Inc/FreeRTOSConfig.h
 crx_jet_final\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 crx_jet_final\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

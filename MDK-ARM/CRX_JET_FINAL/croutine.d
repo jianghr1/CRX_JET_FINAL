@@ -1,7 +1,7 @@
 crx_jet_final\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/croutine.c
 crx_jet_final\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-crx_jet_final\croutine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-crx_jet_final\croutine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+crx_jet_final\croutine.o: C:\applications\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+crx_jet_final\croutine.o: C:\applications\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 crx_jet_final\croutine.o: ../Core/Inc/FreeRTOSConfig.h
 crx_jet_final\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 crx_jet_final\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

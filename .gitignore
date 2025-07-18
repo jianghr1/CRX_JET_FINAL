@@ -1,6 +1,6 @@
 # Binary files
 MDK-ARM/bin/*
-MDK-ARM/CRX_JET/*
+MDK-ARM/CRX_JET_FINAL/*
 *.lst
 
 # User-specific GUI config
