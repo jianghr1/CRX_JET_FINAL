@@ -1,0 +1,12 @@
+crx_jet_final\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/list.c
+crx_jet_final\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+crx_jet_final\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+crx_jet_final\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+crx_jet_final\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+crx_jet_final\list.o: ../Core/Inc/FreeRTOSConfig.h
+crx_jet_final\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+crx_jet_final\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+crx_jet_final\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+crx_jet_final\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+crx_jet_final\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+crx_jet_final\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
