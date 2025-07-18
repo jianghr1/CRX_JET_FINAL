@@ -715,6 +715,7 @@ void TMC_setCoolStep(TMC* self, uint16_t semin, uint8_t semax, uint8_t seup, uin
 				1 - restores TOFF off time with previous values
 -----------------------------------------------------------------------------------------------*/
 void TMC_softEnable(TMC* self, bool enable){
+	self->tim_ptr->steps[self->tim_channel] = 0;
 	if(TMC_readRegister(self, TMC_REG_CHOPCONF)) return;
 	
 	uint32_t data = _TMC_read32bit(); // read and buffer register

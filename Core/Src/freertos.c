@@ -51,50 +51,48 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-extern TIM_HandleTypeDef htim2;
-extern TIM_HandleTypeDef htim9;
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for motorTask */
 osThreadId_t motorTaskHandle;
 const osThreadAttr_t motorTask_attributes = {
   .name = "motorTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for pumpTask */
 osThreadId_t pumpTaskHandle;
 const osThreadAttr_t pumpTask_attributes = {
   .name = "pumpTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for vacTask */
 osThreadId_t vacTaskHandle;
 const osThreadAttr_t vacTask_attributes = {
   .name = "vacTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for jettingTask */
 osThreadId_t jettingTaskHandle;
 const osThreadAttr_t jettingTask_attributes = {
   .name = "jettingTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for headerTask */
 osThreadId_t headerTaskHandle;
 const osThreadAttr_t headerTask_attributes = {
   .name = "headerTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for sensorTask */
 osThreadId_t sensorTaskHandle;
@@ -102,6 +100,13 @@ const osThreadAttr_t sensorTask_attributes = {
   .name = "sensorTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for compTask */
+osThreadId_t compTaskHandle;
+const osThreadAttr_t compTask_attributes = {
+  .name = "compTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -116,6 +121,7 @@ extern void StartVacTask(void *argument);
 extern void StartJettingTask(void *argument);
 extern void StartHeaderTask(void *argument);
 extern void StartSensorTask(void *argument);
+extern void StartCompTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -168,6 +174,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of sensorTask */
   sensorTaskHandle = osThreadNew(StartSensorTask, NULL, &sensorTask_attributes);
 
+  /* creation of compTask */
+  compTaskHandle = osThreadNew(StartCompTask, NULL, &compTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -197,26 +206,8 @@ void StartDefaultTask(void *argument)
 		// Wait For CDC Command
     flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, 20);
 		// Emergemcy Stop Handling
-		if (currentState == GlobalStateEStop)
+		if (currentState == GlobalStateEStop || currentState == GlobalStateError)
 		{
-			//TODO
-			HAL_GPIO_WritePin(MS1_CTL_GPIO_Port , MS1_CTL_Pin , GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(MS2_CTL_GPIO_Port , MS2_CTL_Pin , GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(VAC1_CTL_GPIO_Port, VAC1_CTL_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(VAC2_CTL_GPIO_Port, VAC2_CTL_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(UVF_CTL_GPIO_Port , UVF_CTL_Pin , GPIO_PIN_RESET);
-			htim2.Instance->CCR2 = 0;
-			htim9.Instance->CCR1 = 0;
-			TMC_softEnable(TMC_MX , false);
-			TMC_softEnable(TMC_MZ1, false);
-			TMC_softEnable(TMC_MZ2, false);
-			TMC_softEnable(TMC_VAC, false);
-			TMC_softEnable(TMC_MS1, false);
-			TMC_softEnable(TMC_MS2, false);
-			TMC_softEnable(TMC_QJ , false);
-			TMC_softEnable(TMC_FY , false);
-			
-			
 			continue;
 		}
 		if (flag & ALL_NEW_TASK)

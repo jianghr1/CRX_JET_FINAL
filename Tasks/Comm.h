@@ -102,4 +102,8 @@ GMCommand_t* Comm_Fetch_Queue(void);
 GMCommand_t* Comm_Put_Queue(void);
 void Comm_Put_Queue_CPLT(void);
 
+uint8_t usb_printf(const char *format, ...);
+
+void EmergencyStop(GlobalState_t issue);
+
 #endif//_COMM_H

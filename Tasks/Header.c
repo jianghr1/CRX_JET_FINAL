@@ -20,9 +20,8 @@ void StartHeaderTask(void *argument) {
 		if (currentState == GlobalStateEStop || currentState == GlobalStateError)
 		{
 			heater_working = 0;
-			continue;
 		}
-		if (flag & ALL_NEW_TASK) {
+		else if (flag & ALL_NEW_TASK) {
 			switch(currentIntCommandPtr->code)
 			{
 				case M120: {

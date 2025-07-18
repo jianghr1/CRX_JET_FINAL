@@ -15,9 +15,7 @@ HAL_StatusTypeDef Pressure_Read(I2C_HandleTypeDef *hi2c)
 {
 
     uint8_t pressure_buf[3];
-    uint8_t temp_buf[2];
     uint32_t pressure_adc;
-    int16_t temp_adc;
 	
     // Read pressure data
     if (HAL_I2C_Mem_Read(hi2c, PRESSURE_I2C_ADDR, 0x06, I2C_MEMADD_SIZE_8BIT, pressure_buf, 3, 100) != HAL_OK)
