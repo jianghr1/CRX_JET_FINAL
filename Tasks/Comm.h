@@ -17,6 +17,9 @@ typedef enum {
 	G110 = 10,
 	G111 = 11,
 	G112 = 12,
+	G113 = 13, // Z move sycn
+	G114 = 14, // X zeroing
+	G115 = 15, // Z zeroing
 	M120 = 20,
 	M121 = 21,
 	M122 = 22,
@@ -66,8 +69,18 @@ typedef enum {
 	GlobalStateEStop = 7,
 } GlobalState_t;
 
+typedef struct {
+	int32_t vac_pressure;
+	int16_t temperature;
+	uint16_t x_encoder_pos;
+	uint16_t trigger_state;
+	uint16_t motor_state;
+} GlobalInfo_t;
+
 extern GlobalState_t currentState;
 extern GMCommand_t* currentIntCommandPtr;
+extern GlobalInfo_t globalInfo;
+
 void Comm_Init_Queue(); 
 GMCommand_t* Comm_Fetch_Queue();
 GMCommand_t* Comm_Put_Queue();

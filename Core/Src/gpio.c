@@ -101,9 +101,9 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(EN37V_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PE9 PE10 SW3_Pin SW2_Pin
+  /*Configure GPIO pins : MS1_YWE9_Pin MS2_YWE10_Pin SW3_Pin SW2_Pin
                            SW1_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10|SW3_Pin|SW2_Pin
+  GPIO_InitStruct.Pin = MS1_YWE9_Pin|MS2_YWE10_Pin|SW3_Pin|SW2_Pin
                           |SW1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;

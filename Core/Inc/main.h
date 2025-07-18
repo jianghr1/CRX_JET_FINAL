@@ -91,6 +91,10 @@ void Error_Handler(void);
 #define MS2_YW_GPIO_Port GPIOC
 #define EN37V_Pin GPIO_PIN_1
 #define EN37V_GPIO_Port GPIOB
+#define MS1_YWE9_Pin GPIO_PIN_9
+#define MS1_YWE9_GPIO_Port GPIOE
+#define MS2_YWE10_Pin GPIO_PIN_10
+#define MS2_YWE10_GPIO_Port GPIOE
 #define SW3_Pin GPIO_PIN_13
 #define SW3_GPIO_Port GPIOE
 #define SW2_Pin GPIO_PIN_14
