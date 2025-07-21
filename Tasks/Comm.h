@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 typedef struct GMCommand GMCommand_t;
-typedef void(*GMHandler)(GMCommand_t*);
 typedef struct TMC_t TMC;
 
 typedef enum {
@@ -56,7 +55,7 @@ struct GMCommand {
 	GMCode   code;
 	int32_t  param1;
 	int32_t  param2;
-	int32_t  param3;
+	float    param3;
 	uint8_t  num_params;
 	uint8_t  command_source;
 };

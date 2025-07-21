@@ -51,7 +51,7 @@ void StartMotorTask(void* arg) {
 				TMC_move(TMC_MZ1, MOTOR_Z_MM_TO_ESTEP * currentIntCommandPtr->param3 * MOTOR_Z_MOVE_DIRECTION);
 				TMC_move(TMC_MZ2, MOTOR_Z_MM_TO_ESTEP * currentIntCommandPtr->param3 * MOTOR_Z_MOVE_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
@@ -68,20 +68,20 @@ void StartMotorTask(void* arg) {
 				TMC_setSpeed(TMC_MX, 20 * currentIntCommandPtr->param2);
 				TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * 800 * MOTOR_X_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MX);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_move(TMC_MX, - 2 * MOTOR_X_MM_TO_ESTEP * MOTOR_X_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MX);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_setSpeed(TMC_MX, 0.5 * currentIntCommandPtr->param2);
 				TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * 800 * MOTOR_X_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MX);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
@@ -100,12 +100,12 @@ void StartMotorTask(void* arg) {
 					TMC_move(TMC_MZ2, - 10 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				}
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
@@ -113,30 +113,30 @@ void StartMotorTask(void* arg) {
 				TMC_move(TMC_MZ1, MOTOR_Z_MM_TO_ESTEP * 800 * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, MOTOR_Z_MM_TO_ESTEP * 800 * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_move(TMC_MZ1, - 2 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, - 2 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				
 				TMC_wait_motor_stop(TMC_VAC);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
@@ -144,24 +144,24 @@ void StartMotorTask(void* arg) {
 				TMC_move(TMC_MZ1, MOTOR_Z_MM_TO_ESTEP * 800 * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, MOTOR_Z_MM_TO_ESTEP * 800 * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_move(TMC_MZ1, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop) {
+				if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}

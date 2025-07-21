@@ -1,0 +1,218 @@
+#include "Print.h"
+#include "main.h"
+#include "cmsis_os.h"
+#include "Comm.h"
+#include "TMC2209.h"
+#include "fatfs.h"
+#include "Init.h"
+
+extern osThreadId_t motorTaskHandle;
+extern osThreadId_t pumpTaskHandle;
+extern osThreadId_t vacTaskHandle;
+extern osThreadId_t headerTaskHandle;
+extern osThreadId_t jettingTaskHandle;
+
+uint8_t rx[BLOCKSIZE];
+
+FATFS myFatFs;
+FIL myFile;
+FRESULT f_res;
+uint32_t bytesRead;
+
+float zeropos_x;
+float stepsize_x;
+float stepsize_z;
+uint32_t size_x;
+uint32_t size_y;
+uint32_t size_z;
+
+uint32_t x, y, z;
+
+uint8_t MS1_CH1_List[40];
+uint8_t MS1_CH2_List[16][40];
+uint8_t MS2_CH1_List[64][40];
+uint8_t MS2_CH2_List[64][40];
+
+HeadDecoderState_t decode_state;
+
+uint32_t idx;
+
+void decodeStr(char* ref) {
+	uint32_t ref_idx = 0;
+	while (idx < bytesRead && ref[ref_idx]!=0) {
+		if (ref[ref_idx++] != rx[idx++]) {
+			ref_idx = 0;
+		}
+	}
+}
+
+void decodeUInt(uint32_t* out) {
+	*out = 0;
+	while (idx < bytesRead && (rx[idx] < '0' || rx['idx'] > '9')) ++idx;
+	while (idx < bytesRead) {
+		if (rx[idx] > '0' && rx[idx] < '9') {
+			*out = *out * 10 + rx[idx] & 0xF;
+		} else {
+			return;
+		}
+	}
+}
+
+void decodeFloat(float* out) {
+	*out = 0;
+	float mul = 0.1;
+	while (idx < bytesRead && (rx[idx] < '0' || rx['idx'] > '9')) ++idx;
+	while (idx < bytesRead) {
+		if (rx[idx] > '0' && rx[idx] < '9') {
+			*out = *out * 10 + rx[idx] & 0xF;
+		} else if (rx[idx] == '.') {
+			break;
+		} else {
+			return;
+		}
+	}
+	while (idx < bytesRead) {
+		if (rx[idx] > '0' && rx[idx] < '9') {
+			*out = *out + (rx[idx] & 0xF) * mul;
+			mul *= 0.1;
+		} else {
+			return;
+		}
+	}
+}
+
+void readLine(void) {
+	uint8* CHA_R = MS1_CH1_List;
+	uint8* CHB_R = MS1_CH2_List[x%16];
+	uint8* CHC_R = MS2_CH1_List[x%64];
+	uint8* CHD_R = MS2_CH2_List[x%64];
+	for (y = 0; y < size_y/2; y++) {
+		if (idx == bytesRead)
+		{
+			f_res = f_read(&myFile, rx, sizeof(rx), &bytesRead);
+			if (f_res != FR_OK) {
+				usb_print("Failed to read file");
+				EmergencyStop(GlobalStateError);
+				// Handle error
+				return;
+			}
+			idx = 0;
+		}
+		if ((rx[idx] >> 4) == 0) {
+			// MS1
+			CHA_R[y/8] |= 1<<(7-(y%8));
+			CHC_R[y/8] &= 0xFF - 1<<(7-(y%8));
+		} else {
+			// MS2
+			CHC_R[y/4] |= 1<<(7-(y%8));
+			CHA_R[y/8] &= 0xFF - 1<<(7-(y%8));
+		}
+		
+		if ((rx[idx] & 0xF) == 0) {
+			// MS1
+			CHB_R[y/8] |= 1<<(7-(y%8));
+			CHD_R[x%64][y/8] &= 0xFF - 1<<(7-(y%8));
+		} else {
+			// MS2
+			CHD_R[y/4] |= 1<<(7-(y%8));
+			CHB_R[y/8] &= 0xFF - 1<<(7-(y%8));
+		}
+	}
+	if (y % 8 != 0)
+	{
+		CHA_R[y/8] &= 0xFF << (8-(y%8));
+		CHB_R[y/8] &= 0xFF << (8-(y%8));
+		CHC_R[y/8] &= 0xFF << (8-(y%8));
+		CHD_R[y/8] &= 0xFF << (8-(y%8));
+		y += 8 - (y%8);
+	}
+	for (; y < 320; y+=8)
+	{
+		CHA_R[y/8] = 0;
+		CHB_R[y/8] = 0;
+		CHC_R[y/8] = 0;
+		CHD_R[y/8] = 0;
+	}
+}
+
+void decodeHeader(void) {
+
+	idx = 0;
+	decodeStr("zeropos x");
+	decodeFloat(&zeropos_x);
+	decodeStr("stepsize x");
+	decodeFloat(&stepsize_x);
+	decodeStr("stepsize z");
+	decodeFloat(&stepsize_z);
+	decodeStr("size x");
+	decodeInt(&size_x);
+	decodeStr("size y");
+	decodeInt(&size_y);
+	decodeStr("size z");
+	decodeInt(&size_z);
+	decodeStr("end header");
+}
+
+void PrintTask(void) {
+	f_res = f_mount(&myFatFs, "0:", 1);
+	if (f_res != FR_OK) {
+		usb_print("Failed to mount filesystem");
+		EmergencyStop(GlobalStateError);
+		// Handle error
+		return;
+	}
+	f_res = f_open(&myFile, "amount.txt", FA_OPEN_EXISTING | FA_READ);
+	if (f_res != FR_OK) {
+		usb_print("Failed to open file");
+		EmergencyStop(GlobalStateError);
+		// Handle error
+		return;
+	}
+	f_res = f_read(&myFile, rx, sizeof(rx), &bytesRead);
+	if (f_res != FR_OK) {
+		usb_print("Failed to read file");
+		EmergencyStop(GlobalStateError);
+		// Handle error
+		return;
+	}
+
+	command.code = M120;
+	command.param1 = 70;
+	currentIntCommandPtr = &command;
+	osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
+	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
+	{
+		return;
+	}
+
+	//Decode Header
+	decodeHeader();
+	
+	//Init EveryThing
+	InitTask();
+
+	for (z = 0; z < size_z; z++) {
+		for (x = 0; x < size_x; x++) {
+			readLine();
+			if (currentState == GlobalStateEStop || currentState == GlobalStateError)
+			{
+				return;
+			}
+		}
+	}
+	f_res = f_close(&myFile);
+	if (f_res != FR_OK) {
+		usb_print("Failed to close file");
+		EmergencyStop(GlobalStateError);
+		// Handle error
+		return;
+	}
+	f_res = f_mount(NULL, "0:", 1);
+	if (f_res != FR_OK) {
+		usb_print("Failed to unmount filesystem");
+		EmergencyStop(GlobalStateError);
+		// Handle error
+		return;
+	}
+}

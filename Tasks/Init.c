@@ -35,7 +35,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -44,7 +44,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -54,7 +54,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -64,7 +64,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -74,7 +74,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -84,7 +84,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -94,7 +94,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -104,7 +104,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -115,7 +115,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -125,7 +125,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
@@ -136,7 +136,7 @@ void InitTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop)
+	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
 	{
 		return;
 	}
