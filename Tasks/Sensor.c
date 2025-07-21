@@ -59,6 +59,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				if (triggerHandler.YW1)
 				{
 					TMC_reset(triggerHandler.YW1);
+					triggerHandler.YW1 = 0;
 				}
 				last_trigger_time_ms1 = HAL_GetTick();
 			}
@@ -69,6 +70,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				if (triggerHandler.YW2)
 				{
 					TMC_reset(triggerHandler.YW2);
+					triggerHandler.YW2 = 0;
 				}
 				last_trigger_time_ms2 = HAL_GetTick();
 			}
