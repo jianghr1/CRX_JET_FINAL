@@ -361,7 +361,8 @@ typedef struct {
 	uint32_t steps[4];
 } TMC_TIM;
 
-typedef struct {
+typedef struct TMC_t TMC;
+struct TMC_t {
 	GCONF global_config;				// Global device configurations
 	uint32_t drv_stat;
 	UART_HandleTypeDef* huart;
@@ -372,7 +373,7 @@ typedef struct {
 	uint8_t comm_failure;
 	uint8_t tim_channel;
 	float current_pos;
-} TMC;
+};
 
 extern TMC tmc_drivers[8];
 extern TMC_TIM tmc_timers[3];

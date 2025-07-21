@@ -26,36 +26,50 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		case MX_TRIG_Pin:
 			if (HAL_GetTick() - last_trigger_time_mx  > 100)
 			{
-				TMC_reset(TMC_MX);
-				htim3.Instance->CNT = 0;
+				if (triggerHandler.MX)
+				{
+					TMC_reset(triggerHandler.MX);
+				}
 				last_trigger_time_mx  = HAL_GetTick();
 			}
 			break;
 		case MZ1_TRIG_Pin:
 			if (HAL_GetTick() - last_trigger_time_mz1 > 100)
 			{
-				TMC_reset(TMC_MZ1);
+				if (triggerHandler.MZ1)
+				{
+					TMC_reset(triggerHandler.MZ1);
+				}
 				last_trigger_time_mz1 = HAL_GetTick();
 			}
 			break;
 		case MZ2_TRIG_Pin:
 			if (HAL_GetTick() - last_trigger_time_mz2 > 100)
 			{
-				TMC_reset(TMC_MZ2);
+				if (triggerHandler.MZ2)
+				{
+					TMC_reset(triggerHandler.MZ2);
+				}
 				last_trigger_time_mz2 = HAL_GetTick();
 			}
 			break;
 		case MS1_YW_Pin:
 			if (HAL_GetTick() - last_trigger_time_ms1 > 100)
 			{
-				TMC_reset(TMC_MS1);
+				if (triggerHandler.YW1)
+				{
+					TMC_reset(triggerHandler.YW1);
+				}
 				last_trigger_time_ms1 = HAL_GetTick();
 			}
 			break;
 		case MS2_YW_Pin:
 			if (HAL_GetTick() - last_trigger_time_ms2 > 100)
 			{
-				TMC_reset(TMC_MS2);
+				if (triggerHandler.YW2)
+				{
+					TMC_reset(triggerHandler.YW2);
+				}
 				last_trigger_time_ms2 = HAL_GetTick();
 			}
 			break;

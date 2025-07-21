@@ -200,6 +200,11 @@ void StartDefaultTask(void *argument)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
 	uint32_t flag;
+	/* Global Init */
+	triggerHandler.MX  = TMC_MX;
+	triggerHandler.MZ1 = TMC_MZ1;
+	triggerHandler.MZ2 = TMC_MZ2;
+
   /* Infinite loop */
   for(;;)
   {
@@ -215,10 +220,9 @@ void StartDefaultTask(void *argument)
 			currentIntCommandPtr = Comm_Fetch_Queue();
 			if (currentIntCommandPtr == 0)
 			{
-				// This Should Not Happen Unless EStop
+				// This Should Not Happen
 				continue;
-			}
-			if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
+			} else if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
 			{
 				// Dispatch To Pump Thread
 				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);

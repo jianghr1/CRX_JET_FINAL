@@ -5,6 +5,7 @@
 
 typedef struct GMCommand GMCommand_t;
 typedef void(*GMHandler)(GMCommand_t*);
+typedef struct TMC_t TMC;
 
 typedef enum {
 	M100 =  0,
@@ -93,9 +94,18 @@ typedef struct {
 	uint16_t motor_state;
 } GlobalInfo_t;
 
+typedef struct {
+	TMC* MX;
+	TMC* MZ1;
+	TMC* MZ2;
+	TMC* YW1;
+	TMC* YW2;
+} TriggerHandler_t;
+
 extern GlobalState_t currentState;
 extern GMCommand_t* currentIntCommandPtr;
 extern GlobalInfo_t globalInfo;
+extern TriggerHandler_t triggerHandler;
 
 void Comm_Init_Queue(void); 
 GMCommand_t* Comm_Fetch_Queue(void);

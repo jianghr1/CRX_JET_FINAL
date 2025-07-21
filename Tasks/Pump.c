@@ -52,6 +52,7 @@ void StartPumpTask(void *argument) {
 			// MS rotate until trigger
 			case M107: {
 				if (HAL_GPIO_ReadPin(MS1_YW_GPIO_Port, MS1_YW_Pin) != YW_TRIGGERED_LVL) {
+					triggerHandler.YW1 = TMC_MS1;
 					TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
 					TMC_move(TMC_MS1, 0xFFFF * PUMP_CW_DIRECTION);
 					TMC_wait_motor_stop(TMC_MS1);
@@ -61,6 +62,7 @@ void StartPumpTask(void *argument) {
 			}
 			case M108: {
 				if (HAL_GPIO_ReadPin(MS2_YW_GPIO_Port, MS2_YW_Pin) != YW_TRIGGERED_LVL) {
+					triggerHandler.YW2 = TMC_MS2;
 					TMC_setSpeed(TMC_MS2, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
 					TMC_move(TMC_MS2, 0xFFFF * PUMP_CW_DIRECTION);
 					TMC_wait_motor_stop(TMC_MS2);

@@ -8,6 +8,7 @@
 GlobalState_t currentState;
 GMCommand_t* currentIntCommandPtr;
 GlobalInfo_t globalInfo;
+TriggerHandler_t triggerHandler;
 
 GMCommand_t commIntQueue[COMM_QUEUE_SIZE];
 uint32_t commIntQueueHead;
