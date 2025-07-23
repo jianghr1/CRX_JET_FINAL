@@ -204,6 +204,10 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN StartDefaultTask */
 	static GMCommand_t command;
 	
+	TMC_init(TMC_MS1, MRES_16);
+	TMC_init(TMC_MS2, MRES_16);
+	TMC_init(TMC_QJ, MRES_16);
+	TMC_init(TMC_FY, MRES_16);
 	// MS1
 	TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * 360);
 	TMC_move(TMC_MS1, PUMP_ROTATE_EDEG * 360 * PUMP_CW_DIR);
