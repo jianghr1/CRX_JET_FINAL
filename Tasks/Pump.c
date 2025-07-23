@@ -5,7 +5,7 @@
 #include "TMC2209.h"
 
 #define PUMP_CW_DIRECTION (currentIntCommandPtr->param1*2-1)
-#define PUMP_ROTATE_EDEG 0.5556
+#define PUMP_ROTATE_EDEG 0.5556f
 #define YW_TRIGGERED_LVL GPIO_PIN_RESET
 
 extern osThreadId_t defaultTaskHandle;

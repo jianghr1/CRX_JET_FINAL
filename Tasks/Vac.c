@@ -6,7 +6,7 @@
 
 #define VAC_CW_DIRECTION +1
 #define VAC_PRESSURE_DIRECTION -1
-#define MOTOR_DEGREE_TO_ESTEP 0.5556
+#define MOTOR_DEGREE_TO_ESTEP 0.5556f
 extern osThreadId_t defaultTaskHandle;
 
 void StartVacTask(void* arg) {
