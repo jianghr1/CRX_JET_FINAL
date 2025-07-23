@@ -558,6 +558,10 @@ void TMC_setMicrostepResolution(TMC* self, uint16_t mstep_res){
 
 void TMC_setSpeed(TMC* self, float erps){
 	self->tim_ptr->target_speed = erps * self->stepDivision;
+	if (self->tim_ptr->target_speed > 0){
+		uint32_t arr = TMC_TIMER_IFREQ / self->tim_ptr->target_speed;
+		self->tim_ptr->htim->Instance->ARR = (arr > 0xFFFF) ? 0xFFFF : arr;
+	}
 }
 
 void TMC_setAcceleration(TMC* self, float acceleration){

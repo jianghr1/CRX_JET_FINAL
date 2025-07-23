@@ -28,12 +28,10 @@ uint32_t size_z;
 
 uint32_t x, y, z;
 
-uint8_t MS1_CH1_List[40];
-uint8_t MS1_CH2_List[16][40];
-uint8_t MS2_CH1_List[64][40];
-uint8_t MS2_CH2_List[64][40];
-
-HeadDecoderState_t decode_state;
+uint8_t MS1_CH1_List[42];
+uint8_t MS1_CH2_List[16][42];
+uint8_t MS2_CH1_List[64][42];
+uint8_t MS2_CH2_List[64][42];
 
 uint32_t idx;
 
@@ -86,6 +84,12 @@ void readLine(void) {
 	uint8* CHB_R = MS1_CH2_List[x%16];
 	uint8* CHC_R = MS2_CH1_List[x%64];
 	uint8* CHD_R = MS2_CH2_List[x%64];
+
+	CHA_R[0] = 0xA8; ++CHA_R;
+	CHB_R[0] = 0xA9; ++CHB_R;
+	CHC_R[0] = 0xAA; ++CHC_R;
+	CHD_R[0] = 0xAB; ++CHD_R;
+	
 	for (y = 0; y < size_y/2; y++) {
 		if (idx == bytesRead)
 		{
@@ -133,6 +137,10 @@ void readLine(void) {
 		CHC_R[y/8] = 0;
 		CHD_R[y/8] = 0;
 	}
+	CHA_R[40] = _swuart_calcCRC(CHA_R-1, 42);
+	CHB_R[40] = _swuart_calcCRC(CHB_R-1, 42);
+	CHC_R[40] = _swuart_calcCRC(CHC_R-1, 42);
+	CHD_R[40] = _swuart_calcCRC(CHD_R-1, 42);
 }
 
 void decodeHeader(void) {
@@ -153,7 +161,7 @@ void decodeHeader(void) {
 	decodeStr("end header");
 }
 
-void PrintTask(void) {
+void PrintTaskPrepare(void) {
 	f_res = f_mount(&myFatFs, "0:", 1);
 	if (f_res != FR_OK) {
 		usb_print("Failed to mount filesystem");
@@ -176,6 +184,19 @@ void PrintTask(void) {
 		return;
 	}
 
+	//Decode Header
+	decodeHeader();
+	
+	//Init EveryThing
+	InitTask();
+
+}
+
+void PrintTask(void) {
+
+	static GMCommand_t command;
+
+	// Heater Set To 70 degree
 	command.code = M120;
 	command.param1 = 70;
 	currentIntCommandPtr = &command;
@@ -186,17 +207,35 @@ void PrintTask(void) {
 		return;
 	}
 
-	//Decode Header
-	decodeHeader();
-	
-	//Init EveryThing
-	InitTask();
-
 	for (z = 0; z < size_z; z++) {
+		if (currentState == GlobalStatePause) {
+			
+		}
+
 		for (x = 0; x < size_x; x++) {
 			readLine();
 			if (currentState == GlobalStateEStop || currentState == GlobalStateError)
 			{
+				return;
+			}
+			// currently, We only Consider Channel A
+			jettingInfo.data = MS1_CH1_List;
+			// jettingInfo.threadId = TBD
+			osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
+			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+			if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
+				return;
+			}
+			
+			// Move To Next Position
+			command.code = G110;
+			command.param1 = 1;
+			command.param2 = 30;
+			command.param3 = stepsize_x;
+			currentIntCommandPtr = &command;
+			osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
+			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+			if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
 				return;
 			}
 		}

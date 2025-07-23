@@ -59,7 +59,7 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define JETTING_FPGA_REPLY 16
 #define ALL_EMG_STOP 1
-#define ALL_PAUSE 2
+#define JETTING_UART_CPLT 8
 #define ALL_NEW_TASK 4
 #define MAIN_TASK_CPLT 4
 #define VSEL_A_Pin GPIO_PIN_3
