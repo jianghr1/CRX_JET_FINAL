@@ -224,7 +224,7 @@ void StartDefaultTask(void *argument)
 	TMC_move(TMC_QJ, PUMP_ROTATE_EDEG * 360 * PUMP_CCW_DIR);
 	TMC_wait_motor_stop(TMC_QJ);
 	
-	// QJ
+	// FY
 	TMC_setSpeed(TMC_FY, PUMP_ROTATE_EDEG * 360);
 	TMC_move(TMC_FY, PUMP_ROTATE_EDEG * 360 * PUMP_CW_DIR);
 	TMC_wait_motor_stop(TMC_FY);
@@ -232,6 +232,34 @@ void StartDefaultTask(void *argument)
 	TMC_setSpeed(TMC_FY, PUMP_ROTATE_EDEG * 180);
 	TMC_move(TMC_FY, PUMP_ROTATE_EDEG * 360 * PUMP_CCW_DIR);
 	TMC_wait_motor_stop(TMC_FY);
+	
+	// Command
+	for (int channel = 0; channel < 4; channel++) {
+		// MS1 Rotate CW
+		command.code = M100+channel;
+		command.param1 = 0;
+		command.param2 = 360;
+		command.param3 = 360;
+		currentIntCommandPtr = &command;
+		osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+		if (currentState == GlobalStateEStop || currentState == GlobalStateError)
+		{
+			return;
+		}
+		// MS1 Rotate CCW
+		command.code = M100+channel;
+		command.param1 = 1;
+		command.param2 = 360;
+		command.param3 = 360;
+		currentIntCommandPtr = &command;
+		osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+		if (currentState == GlobalStateEStop || currentState == GlobalStateError)
+		{
+			return;
+		}
+	}
 	
 //	uint32_t flag;
 //	/* Global Init */
