@@ -193,69 +193,110 @@ void MX_FREERTOS_Init(void) {
   * @param  argument: Not used
   * @retval None
   */
+#define PUMP_CW_DIR -1
+#define PUMP_CCW_DIR 1
+#define PUMP_ROTATE_EDEG 0.5556
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
-	uint32_t flag;
-	/* Global Init */
-	triggerHandler.MX  = TMC_MX;
-	triggerHandler.MZ1 = TMC_MZ1;
-	triggerHandler.MZ2 = TMC_MZ2;
+	static GMCommand_t command;
+	
+	// MS1
+	TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * 360);
+	TMC_move(TMC_MS1, PUMP_ROTATE_EDEG * 360 * PUMP_CW_DIR);
+	TMC_wait_motor_stop(TMC_MS1);
+	
+	TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * 180);
+	TMC_move(TMC_MS1, PUMP_ROTATE_EDEG * 360 * PUMP_CCW_DIR);
+	TMC_wait_motor_stop(TMC_MS1);
+	
+	// MS2
+	TMC_setSpeed(TMC_MS2, PUMP_ROTATE_EDEG * 360);
+	TMC_move(TMC_MS2, PUMP_ROTATE_EDEG * 360 * PUMP_CW_DIR);
+	TMC_wait_motor_stop(TMC_MS2);
+	
+	TMC_setSpeed(TMC_MS2, PUMP_ROTATE_EDEG * 180);
+	TMC_move(TMC_MS2, PUMP_ROTATE_EDEG * 360 * PUMP_CCW_DIR);
+	TMC_wait_motor_stop(TMC_MS2);
+	
+	// QJ
+	TMC_setSpeed(TMC_QJ, PUMP_ROTATE_EDEG * 360);
+	TMC_move(TMC_QJ, PUMP_ROTATE_EDEG * 360 * PUMP_CW_DIR);
+	TMC_wait_motor_stop(TMC_QJ);
+	
+	TMC_setSpeed(TMC_QJ, PUMP_ROTATE_EDEG * 180);
+	TMC_move(TMC_QJ, PUMP_ROTATE_EDEG * 360 * PUMP_CCW_DIR);
+	TMC_wait_motor_stop(TMC_QJ);
+	
+	// QJ
+	TMC_setSpeed(TMC_FY, PUMP_ROTATE_EDEG * 360);
+	TMC_move(TMC_FY, PUMP_ROTATE_EDEG * 360 * PUMP_CW_DIR);
+	TMC_wait_motor_stop(TMC_FY);
+	
+	TMC_setSpeed(TMC_FY, PUMP_ROTATE_EDEG * 180);
+	TMC_move(TMC_FY, PUMP_ROTATE_EDEG * 360 * PUMP_CCW_DIR);
+	TMC_wait_motor_stop(TMC_FY);
+	
+//	uint32_t flag;
+//	/* Global Init */
+//	triggerHandler.MX  = TMC_MX;
+//	triggerHandler.MZ1 = TMC_MZ1;
+//	triggerHandler.MZ2 = TMC_MZ2;
 
-  /* Infinite loop */
-  for(;;)
-  {
-		// Wait For CDC Command
-    flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, 20);
-		// Emergemcy Stop Handling
-		if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-		{
-			continue;
-		}
-		if (flag & ALL_NEW_TASK)
-		{
-			currentIntCommandPtr = Comm_Fetch_Queue();
-			if (currentIntCommandPtr == 0)
-			{
-				// This Should Not Happen
-				continue;
-			} else if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
-			{
-				// Dispatch To Pump Thread
-				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >= 4 && currentIntCommandPtr->code <= 6)
-			{
-				// Dispatch To Motor Thread
-				osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >= 7 && currentIntCommandPtr->code <= 8)
-			{
-				// Dispatch To Pump Thread
-				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=20)
-			{
-				// Dispatch To Motor Thread
-				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=30)
-			{
-				// Dispatch To Motor Thread
-				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=41)
-			{
-				// Dispatch To Pump Thread
-				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=50 && currentIntCommandPtr->code <=70)
-			{
-				// Query
-			} else if (currentIntCommandPtr->code == M171)
-			{
-				// Need to 
-			}
-			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-		}
-  }
+//  /* Infinite loop */
+//  for(;;)
+//  {
+//		// Wait For CDC Command
+//    flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, 20);
+//		// Emergemcy Stop Handling
+//		if (currentState == GlobalStateEStop || currentState == GlobalStateError)
+//		{
+//			continue;
+//		}
+//		if (flag & ALL_NEW_TASK)
+//		{
+//			currentIntCommandPtr = Comm_Fetch_Queue();
+//			if (currentIntCommandPtr == 0)
+//			{
+//				// This Should Not Happen
+//				continue;
+//			} else if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
+//			{
+//				// Dispatch To Pump Thread
+//				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+//			} else if (currentIntCommandPtr->code >= 4 && currentIntCommandPtr->code <= 6)
+//			{
+//				// Dispatch To Motor Thread
+//				osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
+//			} else if (currentIntCommandPtr->code >= 7 && currentIntCommandPtr->code <= 8)
+//			{
+//				// Dispatch To Pump Thread
+//				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+//			} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=20)
+//			{
+//				// Dispatch To Motor Thread
+//				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
+//			} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=30)
+//			{
+//				// Dispatch To Motor Thread
+//				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
+//			} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=41)
+//			{
+//				// Dispatch To Pump Thread
+//				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+//			} else if (currentIntCommandPtr->code >=50 && currentIntCommandPtr->code <=70)
+//			{
+//				// Query
+//			} else if (currentIntCommandPtr->code == M171)
+//			{
+//				// Need to 
+//			}
+//			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+//		}
+//  }
   /* USER CODE END StartDefaultTask */
 }
 
