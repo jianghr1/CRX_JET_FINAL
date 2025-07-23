@@ -95,14 +95,14 @@ void StartSensorTask(void *argument) {
 	while(1) {
 		HAL_ADC_Start_IT(&hadc1);
 		Pressure_Read(&hi2c1);
-		globalInfo.trigger_state.bits.MX  = HAL_GPIO_ReadPin(MX_TRIG_GPIO_Port , MX_TRIG_Pin );
-		globalInfo.trigger_state.bits.MZ1 = HAL_GPIO_ReadPin(MZ1_TRIG_GPIO_Port, MZ1_TRIG_Pin);
-		globalInfo.trigger_state.bits.MZ2 = HAL_GPIO_ReadPin(MZ2_TRIG_GPIO_Port, MZ2_TRIG_Pin);
-		globalInfo.trigger_state.bits.YW1 = HAL_GPIO_ReadPin(MS1_YW_GPIO_Port,   MS1_YW_Pin  );
-		globalInfo.trigger_state.bits.YW2 = HAL_GPIO_ReadPin(MS2_YW_GPIO_Port,   MS2_YW_Pin  );
-		globalInfo.trigger_state.bits.SW1 = HAL_GPIO_ReadPin(SW1_GPIO_Port,      SW1_Pin     );
-		globalInfo.trigger_state.bits.SW2 = HAL_GPIO_ReadPin(SW2_GPIO_Port,      SW2_Pin     );
-		globalInfo.trigger_state.bits.SW3 = HAL_GPIO_ReadPin(SW3_GPIO_Port,      SW3_Pin     );
+		globalInfo.trigger_state.bits.MX  =  HAL_GPIO_ReadPin(MX_TRIG_GPIO_Port , MX_TRIG_Pin );
+		globalInfo.trigger_state.bits.MZ1 =  HAL_GPIO_ReadPin(MZ1_TRIG_GPIO_Port, MZ1_TRIG_Pin);
+		globalInfo.trigger_state.bits.MZ2 =  HAL_GPIO_ReadPin(MZ2_TRIG_GPIO_Port, MZ2_TRIG_Pin);
+		globalInfo.trigger_state.bits.YW1 = !HAL_GPIO_ReadPin(MS1_YW_GPIO_Port,   MS1_YW_Pin  );
+		globalInfo.trigger_state.bits.YW2 = !HAL_GPIO_ReadPin(MS2_YW_GPIO_Port,   MS2_YW_Pin  );
+		globalInfo.trigger_state.bits.SW1 = !HAL_GPIO_ReadPin(SW1_GPIO_Port,      SW1_Pin     );
+		globalInfo.trigger_state.bits.SW2 = !HAL_GPIO_ReadPin(SW2_GPIO_Port,      SW2_Pin     );
+		globalInfo.trigger_state.bits.SW3 = !HAL_GPIO_ReadPin(SW3_GPIO_Port,      SW3_Pin     );
 		globalInfo.x_encoder_pos = htim3.Instance->CNT;
 		osDelay(5);
 	}

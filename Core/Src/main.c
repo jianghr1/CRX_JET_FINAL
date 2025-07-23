@@ -127,7 +127,9 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
 	HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1|TIM_CHANNEL_2);
 	Comm_Init_Queue();
-	
+	HAL_GPIO_WritePin(LEDR_GPIO_Port, LEDR_Pin, 1);
+	HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDG_Pin, 1);
+	HAL_GPIO_WritePin(LEDB_GPIO_Port, LEDB_Pin, 1);
   /* USER CODE END 2 */
 
   /* Init scheduler */

@@ -34,14 +34,14 @@ void StartPumpTask(void *argument) {
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
-			case M103: {
+			case M102: {
 				TMC_setSpeed(TMC_QJ, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
 				TMC_move(TMC_QJ, PUMP_ROTATE_EDEG * currentIntCommandPtr->param3 * PUMP_CW_DIRECTION);
 				TMC_wait_motor_stop(TMC_QJ);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
-			case M104: {
+			case M103: {
 				TMC_setSpeed(TMC_FY, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
 				TMC_move(TMC_FY, PUMP_ROTATE_EDEG * currentIntCommandPtr->param3 * PUMP_CW_DIRECTION);
 				TMC_wait_motor_stop(TMC_FY);
