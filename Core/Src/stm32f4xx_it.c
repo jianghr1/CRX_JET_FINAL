@@ -364,6 +364,8 @@ void SDIO_IRQHandler(void)
 void TIM7_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM7_IRQn 0 */
+	HAL_IncTick();
+	__HAL_TIM_CLEAR_IT(&htim7, TIM_IT_UPDATE);
 
   /* USER CODE END TIM7_IRQn 0 */
   /* USER CODE BEGIN TIM7_IRQn 1 */
