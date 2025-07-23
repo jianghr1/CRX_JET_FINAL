@@ -4,6 +4,8 @@
 #include "Comm.h"
 #include "TMC2209.h"
 #include "pressure.h"
+#include "Jetting.h"
+
 extern osThreadId_t jettingTaskHandle;
 extern ADC_HandleTypeDef hadc1;
 extern I2C_HandleTypeDef hi2c1;
@@ -18,9 +20,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	switch (GPIO_Pin)
 	{
 		case N_CRC_FAIL_Pin:
+			jettingInfo.status = 1;
 			osThreadFlagsSet(jettingTaskHandle, JETTING_FPGA_REPLY);
 			break;
 		case JETTING_Pin:
+			jettingInfo.status = 2;
 			osThreadFlagsSet(jettingTaskHandle, JETTING_FPGA_REPLY);
 			break;
 		case MX_TRIG_Pin:

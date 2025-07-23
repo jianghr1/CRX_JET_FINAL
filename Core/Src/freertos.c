@@ -56,7 +56,7 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for motorTask */
@@ -101,13 +101,6 @@ const osThreadAttr_t sensorTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for compTask */
-osThreadId_t compTaskHandle;
-const osThreadAttr_t compTask_attributes = {
-  .name = "compTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
-};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -121,7 +114,6 @@ extern void StartVacTask(void *argument);
 extern void StartJettingTask(void *argument);
 extern void StartHeaderTask(void *argument);
 extern void StartSensorTask(void *argument);
-extern void StartCompTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -173,9 +165,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of sensorTask */
   sensorTaskHandle = osThreadNew(StartSensorTask, NULL, &sensorTask_attributes);
-
-  /* creation of compTask */
-  compTaskHandle = osThreadNew(StartCompTask, NULL, &compTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
