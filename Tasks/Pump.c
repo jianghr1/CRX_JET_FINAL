@@ -52,20 +52,34 @@ void StartPumpTask(void *argument) {
 			// MS rotate until trigger
 			case M107: {
 				if (HAL_GPIO_ReadPin(MS1_YW_GPIO_Port, MS1_YW_Pin) != YW_TRIGGERED_LVL) {
-					triggerHandler.YW1 = TMC_MS1;
-					TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
-					TMC_move(TMC_MS1, 0xFFFF * PUMP_CW_DIRECTION);
-					TMC_wait_motor_stop(TMC_MS1);
+					if (currentIntCommandPtr->param3 == 0) {
+						triggerHandler.YW1 = TMC_MS1;
+						TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
+						TMC_move(TMC_MS1, 0xFFFF * PUMP_CW_DIRECTION);
+						TMC_wait_motor_stop(TMC_MS1);
+					} else {
+						triggerHandler.YW1 = TMC_QJ;
+						TMC_setSpeed(TMC_QJ, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
+						TMC_move(TMC_QJ, 0xFFFF * PUMP_CW_DIRECTION);
+						TMC_wait_motor_stop(TMC_QJ);
+					}
 				}
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M108: {
 				if (HAL_GPIO_ReadPin(MS2_YW_GPIO_Port, MS2_YW_Pin) != YW_TRIGGERED_LVL) {
-					triggerHandler.YW2 = TMC_MS2;
-					TMC_setSpeed(TMC_MS2, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
-					TMC_move(TMC_MS2, 0xFFFF * PUMP_CW_DIRECTION);
-					TMC_wait_motor_stop(TMC_MS2);
+					if (currentIntCommandPtr->param3 == 0) {
+						triggerHandler.YW2 = TMC_MS2;
+						TMC_setSpeed(TMC_MS2, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
+						TMC_move(TMC_MS2, 0xFFFF * PUMP_CW_DIRECTION);
+						TMC_wait_motor_stop(TMC_MS2);
+					} else {
+						triggerHandler.YW2 = TMC_QJ;
+						TMC_setSpeed(TMC_QJ, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
+						TMC_move(TMC_QJ, 0xFFFF * PUMP_CW_DIRECTION);
+						TMC_wait_motor_stop(TMC_QJ);
+					}
 				}				
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
