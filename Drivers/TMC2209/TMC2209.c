@@ -129,21 +129,21 @@ TMC tmc_drivers[8] = {
 	/* FY Settings */
 	{
 		.address=1,
-		.huart=&huart1,
+		.huart=&huart3,
 		.tim_ptr=&tmc_timers[TMC_TIMER4],
 		.tim_channel=0
 	},
 	/* MS2 Settings */
 	{
 		.address=2,
-		.huart=&huart1,
+		.huart=&huart3,
 		.tim_ptr=&tmc_timers[TMC_TIMER4],
 		.tim_channel=3
 	},
 	/* MS1 Settings */
 	{
 		.address=3,
-		.huart=&huart1,
+		.huart=&huart3,
 		.tim_ptr=&tmc_timers[TMC_TIMER4],
 		.tim_channel=2
 	}
@@ -151,7 +151,7 @@ TMC tmc_drivers[8] = {
 
 static uint8_t TMC_readRegister(TMC* self, uint8_t reg_addr){
 	uint32_t timeout = TMC_UART_TX_TIMEOUT;
-	uint8_t datagram[DATAGRAM_READ_REQUEST_SIZE];
+	static uint8_t datagram[DATAGRAM_READ_REQUEST_SIZE];
 	// In case of a communication error, the request will resent x times
 	uint8_t retry = 2;
 	RETRY:
@@ -172,7 +172,7 @@ static uint8_t TMC_readRegister(TMC* self, uint8_t reg_addr){
 	{
 		goto COMM_ERROR;
 	}
-	
+	osDelay(1);
 	if (HAL_UART_Transmit(self->huart, datagram, DATAGRAM_READ_REQUEST_SIZE, timeout) != HAL_OK)
 	{
 		goto COMM_ERROR;
@@ -204,7 +204,7 @@ static uint8_t TMC_readRegister(TMC* self, uint8_t reg_addr){
 
 static uint8_t TMC_writeRegister(TMC* self, uint8_t reg_addr, uint32_t data){
 	uint32_t timeout = TMC_UART_TX_TIMEOUT;
-	uint8_t datagram[DATAGRAM_WRITE_REQUEST_SIZE];
+	static uint8_t datagram[DATAGRAM_WRITE_REQUEST_SIZE];
 		
 	// In case of a communication error, the request will resent x times
 	uint8_t retry = 2;
