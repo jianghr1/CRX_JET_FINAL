@@ -69,7 +69,6 @@ void EmergencyStop(GlobalState_t issue) {
 	extern osThreadId_t vacTaskHandle;
 	extern osThreadId_t headerTaskHandle;
 	extern osThreadId_t jettingTaskHandle;
-	extern osThreadId_t compTaskHandle;
 	// First: Set ESTOP State
 	currentState = issue;
 	// Second: Trigger Low Level Thread
@@ -78,8 +77,6 @@ void EmergencyStop(GlobalState_t issue) {
 	osThreadFlagsSet(vacTaskHandle, ALL_EMG_STOP);
 	osThreadFlagsSet(headerTaskHandle, ALL_EMG_STOP);
 	osThreadFlagsSet(jettingTaskHandle, ALL_EMG_STOP);
-	// Third: Trigger Mid Level Thread
-	osThreadFlagsSet(compTaskHandle, ALL_EMG_STOP);
 	// Forth: Trigger High Level Thread
 	osThreadFlagsSet(defaultTaskHandle, ALL_EMG_STOP);
 	// Finally: Disable All Device
