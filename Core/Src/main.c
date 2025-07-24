@@ -53,7 +53,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint8_t VoltageR = 129;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,10 +126,22 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
 	HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1|TIM_CHANNEL_2);
+	Pressure_Init(&hi2c1);
 	Comm_Init_Queue();
 	HAL_GPIO_WritePin(LEDR_GPIO_Port, LEDR_Pin, 1);
 	HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDG_Pin, 1);
 	HAL_GPIO_WritePin(LEDB_GPIO_Port, LEDB_Pin, 1);
+	HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 0);
+	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 0);
+	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 0);
+	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 0);
+	HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
+	HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
+	HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 1);
+	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 1);
+	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 1);
+	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 1);
+	
   /* USER CODE END 2 */
 
   /* Init scheduler */
