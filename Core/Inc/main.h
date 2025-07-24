@@ -99,13 +99,10 @@ void Error_Handler(void);
 #define JETTING_EXTI_IRQn EXTI15_10_IRQn
 #define SW3_Pin GPIO_PIN_13
 #define SW3_GPIO_Port GPIOE
-#define SW3_EXTI_IRQn EXTI15_10_IRQn
 #define SW2_Pin GPIO_PIN_14
 #define SW2_GPIO_Port GPIOE
-#define SW2_EXTI_IRQn EXTI15_10_IRQn
 #define SW1_Pin GPIO_PIN_15
 #define SW1_GPIO_Port GPIOE
-#define SW1_EXTI_IRQn EXTI15_10_IRQn
 #define MFY_Pin GPIO_PIN_12
 #define MFY_GPIO_Port GPIOD
 #define MQJ_Pin GPIO_PIN_13
