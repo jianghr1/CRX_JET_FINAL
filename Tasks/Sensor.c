@@ -5,6 +5,7 @@
 #include "TMC2209.h"
 #include "pressure.h"
 #include "Jetting.h"
+#include "arm_math.h"
 
 extern osThreadId_t jettingTaskHandle;
 extern ADC_HandleTypeDef hadc1;
@@ -87,8 +88,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	uint32_t X = HAL_ADC_GetValue(hadc);
-	globalInfo.temperature = 2.4433e-6*X*X*X - 3.2588e-3*X*X + 2.3351*X - 264.29;
+	float x = (float)HAL_ADC_GetValue(hadc);
+	x = 51 * x / (4096 - 51);
+	x = 1 / (logf(x) / 3965 + 0.0021926f) - 273.15f;
+	globalInfo.temperature = x * 10;
 }
 
 void StartSensorTask(void *argument) {
