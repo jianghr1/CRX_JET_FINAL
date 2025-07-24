@@ -8,6 +8,8 @@
 #define VAC_PRESSURE_DIRECTION -1
 #define MOTOR_DEGREE_TO_ESTEP 0.5556f
 extern osThreadId_t defaultTaskHandle;
+extern osMutexId_t MUart1MutexHandle;
+extern osMutexId_t MTim8MutexHandle;
 
 void StartVacTask(void* arg) {
 	
@@ -55,15 +57,25 @@ void StartVacTask(void* arg) {
 				// VAC conflict with Motor Z1 and Motor Z2
 				TMC_wait_motor_stop(TMC_MZ1);
 				TMC_wait_motor_stop(TMC_MZ2);
+				TMC_wait_motor_stop(TMC_VAC);
+				osMutexAcquire(MTim8MutexHandle, osWaitForever);
 				TMC_setSpeed(TMC_VAC, 200);
+				osMutexAcquire(MUart1MutexHandle, osWaitForever);
 				TMC_move(TMC_VAC, 4 * VAC_PRESSURE_DIRECTION);
+				osMutexRelease(MUart1MutexHandle);
+				osMutexRelease(MTim8MutexHandle);
 			} else if (globalInfo.vac_pressure - target_pressure > 100)
 			{
 				// VAC conflict with Motor Z1 and Motor Z2
 				TMC_wait_motor_stop(TMC_MZ1);
 				TMC_wait_motor_stop(TMC_MZ2);
+				TMC_wait_motor_stop(TMC_VAC);
+				osMutexAcquire(MTim8MutexHandle, osWaitForever);
 				TMC_setSpeed(TMC_VAC, 200);
+				osMutexAcquire(MUart1MutexHandle, osWaitForever);
 				TMC_move(TMC_VAC,-4 * VAC_PRESSURE_DIRECTION);
+				osMutexRelease(MUart1MutexHandle);
+				osMutexRelease(MTim8MutexHandle);
 			}
 		}
 	}

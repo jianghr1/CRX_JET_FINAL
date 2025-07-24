@@ -101,6 +101,16 @@ const osThreadAttr_t sensorTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for MUart1Mutex */
+osMutexId_t MUart1MutexHandle;
+const osMutexAttr_t MUart1Mutex_attributes = {
+  .name = "MUart1Mutex"
+};
+/* Definitions for MTim8Mutex */
+osMutexId_t MTim8MutexHandle;
+const osMutexAttr_t MTim8Mutex_attributes = {
+  .name = "MTim8Mutex"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -127,6 +137,12 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
+  /* Create the mutex(es) */
+  /* creation of MUart1Mutex */
+  MUart1MutexHandle = osMutexNew(&MUart1Mutex_attributes);
+
+  /* creation of MTim8Mutex */
+  MTim8MutexHandle = osMutexNew(&MTim8Mutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
