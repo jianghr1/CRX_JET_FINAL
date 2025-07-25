@@ -33,6 +33,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Comm.h"
+#include "pressure.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
