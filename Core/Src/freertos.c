@@ -31,6 +31,9 @@
 #include "Jetting.h"
 #include "Pump.h"
 #include "Vac.h"
+#include "Init.h"
+#include "Clean.h"
+#include "Print.h"
 #include "TMC2209.h"
 /* USER CODE END Includes */
 
@@ -209,23 +212,26 @@ void StartDefaultTask(void *argument)
 	triggerHandler.MX  = TMC_MX;
 	triggerHandler.MZ1 = TMC_MZ1;
 	triggerHandler.MZ2 = TMC_MZ2;
-
+	TMC_init(TMC_MX , MRES_16);
+	TMC_init(TMC_MZ1, MRES_16);
+	TMC_init(TMC_MZ2, MRES_16);
+	TMC_init(TMC_VAC, MRES_16);
+	TMC_init(TMC_MS1, MRES_16);
+	TMC_init(TMC_MS2, MRES_16);
+	TMC_init(TMC_FY , MRES_16);
+	TMC_init(TMC_QJ , MRES_16);
   /* Infinite loop */
   for(;;)
   {
 		// Wait For CDC Command
     flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, 20);
 		// Emergemcy Stop Handling
-		if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-		{
+		if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
 			continue;
-		}
-		if (flag & ALL_NEW_TASK)
-		{
+		} else {
 			currentIntCommandPtr = Comm_Fetch_Queue();
 			if (currentIntCommandPtr == 0)
 			{
-				// This Should Not Happen
 				continue;
 			} else if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
 			{
@@ -239,15 +245,15 @@ void StartDefaultTask(void *argument)
 			{
 				// Dispatch To Pump Thread
 				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=20)
+			} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=19)
 			{
 				// Dispatch To Motor Thread
 				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=30)
+			} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=29)
 			{
-				// Dispatch To Motor Thread
-				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=41)
+				// Dispatch To Header Thread
+				osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
+			} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=49)
 			{
 				// Dispatch To Pump Thread
 				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
@@ -256,7 +262,42 @@ void StartDefaultTask(void *argument)
 				// Query
 			} else if (currentIntCommandPtr->code == M171)
 			{
-				// Need to 
+				//
+				switch(currentIntCommandPtr->param1) {
+					case GlobalStateInit: {
+						if (currentState != GlobalStatePrint && currentState != GlobalStateClean) {
+							usb_printf("OK");
+							InitTask();
+						} else {
+							usb_printf("ERROR");
+						}
+						break;
+					}
+					case GlobalStatePOff: {
+						if (currentState == GlobalStateIdle) {
+							usb_printf("OK");
+							
+						} else {
+							usb_printf("ERROR");
+						}
+						break;
+					}
+					case GlobalStateClean: {
+						if (currentState == GlobalStateIdle) {
+							usb_printf("OK");
+							CleanTask(currentIntCommandPtr->param2);
+						} else {
+							usb_printf("ERROR");
+						}
+						break;
+					}
+					case GlobalStateEStop: {
+						usb_printf("OK");
+						break;
+					}
+					default:
+						usb_printf("ERROR");
+				}
 			}
 			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 		}
@@ -268,4 +309,3 @@ void StartDefaultTask(void *argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-
