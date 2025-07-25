@@ -276,12 +276,20 @@ void EXTI9_5_IRQHandler(void)
 void TIM1_UP_TIM10_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 0 */
-	uint32_t step = (tmc_timers[TMC_TIMER1].steps[0] & 0x7F - 1) & 0x7F;
-	htim1.Instance->RCR = step;
-	step = step + 1;
-	htim1.Instance->CCR1 = tmc_timers[TMC_TIMER1].steps[0]?100:0;
-	tmc_timers[TMC_TIMER1].steps[0] -= step;
+	if (tmc_timers[TMC_TIMER1].steps[0]) {
+		htim1.Instance->CCR1 = 100;
+		--tmc_timers[TMC_TIMER1].steps[0];
+	} else {
+		htim1.Instance->CCR1 = 0;
+	}
 	__HAL_TIM_CLEAR_IT(&htim1, TIM_IT_UPDATE);
+//	uint32_t step = (tmc_timers[TMC_TIMER1].steps[0] & 0x7F - 1) & 0x7F;
+//	htim1.Instance->RCR = step;
+//	step = tmc_timers[TMC_TIMER4].steps[0]>0 ? 1 : 0 + 1;
+//	htim1.Instance->CCR1 = tmc_timers[TMC_TIMER1].steps[0]?100:0;
+//	if (tmc_timers[TMC_TIMER1].steps[0])
+//		tmc_timers[TMC_TIMER1].steps[0] -= step;
+//	__HAL_TIM_CLEAR_IT(&htim1, TIM_IT_UPDATE);
   /* USER CODE END TIM1_UP_TIM10_IRQn 0 */
   /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 1 */
 
