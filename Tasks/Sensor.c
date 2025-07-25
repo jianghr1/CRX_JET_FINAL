@@ -11,6 +11,7 @@ extern osThreadId_t jettingTaskHandle;
 extern ADC_HandleTypeDef hadc1;
 extern I2C_HandleTypeDef hi2c1;
 extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim9;
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	static uint32_t last_trigger_time_mx  = 0;
@@ -89,12 +90,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	float x = (float)HAL_ADC_GetValue(hadc);
-	x = 51 * x / (4096 - 51);
+	x = 51 * x / (4096 - x);
 	x = 1 / (logf(x) / 3965 + 0.0021926f) - 273.15f;
 	globalInfo.temperature = x * 10;
 }
 
 void StartSensorTask(void *argument) {
+	static int32_t integeral = 0;
+	
 	while(1) {
 		HAL_ADC_Start_IT(&hadc1);
 		Pressure_Read(&hi2c1);
@@ -107,6 +110,28 @@ void StartSensorTask(void *argument) {
 		globalInfo.trigger_state.bits.SW2 = !HAL_GPIO_ReadPin(SW2_GPIO_Port,      SW2_Pin     );
 		globalInfo.trigger_state.bits.SW3 = !HAL_GPIO_ReadPin(SW3_GPIO_Port,      SW3_Pin     );
 		globalInfo.x_encoder_pos = htim3.Instance->CNT;
+		
+		if (globalInfo.temperature > -100 && globalInfo.temperature < 1000) {
+			int32_t error = globalInfo.targetTemperature - globalInfo.temperature;
+			if (error > 50) {
+				htim9.Instance->CCR1=1000;
+				integeral = 0;
+			} else {
+				if ((integeral ^ error)>>31) {
+					integeral = (integeral * 0.9) + error;
+				} else {
+					integeral = integeral + error;
+				}
+				if (integeral > 0x7FFFFF) integeral = 0x7FFFFF;
+				if (integeral <-0x7FFFFF) integeral =-0x7FFFFF;
+				
+				int32_t ccr = error * 5 + (integeral >> 2);
+				if (ccr > 800) ccr = 800;
+				if (ccr < 0) ccr = 0;
+				htim9.Instance->CCR1=ccr;
+			}
+		}
+		
 		osDelay(5);
 	}
 }
