@@ -298,6 +298,7 @@ void StartDefaultTask(void *argument)
 					default:
 						usb_printf("ERROR");
 				}
+				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 			}
 			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 		}

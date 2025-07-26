@@ -66,7 +66,7 @@ void CleanTask(int32_t channel) {
 	}
 	// MS1 Rotate CCW
 	command.code = M100+channel;
-	command.param1 = 1;
+	command.param1 = 0;
 	command.param2 = 200;
 	command.param3 = PUMP_CCW_DEGREE;
 	currentIntCommandPtr = &command;
@@ -88,7 +88,7 @@ void CleanTask(int32_t channel) {
 	}
 	// QJ To Trigger
 	command.code = M107+channel;
-	command.param1 = 0;
+	command.param1 = 1;
 	command.param2 = 200;
 	command.param3 = 1;
 	currentIntCommandPtr = &command;
@@ -112,7 +112,7 @@ void CleanTask(int32_t channel) {
 	}
 	// QJ Rotate CCW
 	command.code = M102;
-	command.param1 = 1;
+	command.param1 = 0;
 	command.param2 = 200;
 	command.param3 = PUMP_CCW_DEGREE;
 	currentIntCommandPtr = &command;

@@ -21,15 +21,6 @@ void InitTask(void) {
 	TMC_init(TMC_QJ , MRES_16);
 	TMC_init(TMC_FY , MRES_16);
 	
-	TMC_softEnable(TMC_MX , true);
-	TMC_softEnable(TMC_MZ1, true);
-	TMC_softEnable(TMC_MZ2, true);
-	TMC_softEnable(TMC_VAC, true);
-	TMC_softEnable(TMC_MS1, true);
-	TMC_softEnable(TMC_MS2, true);
-	TMC_softEnable(TMC_QJ , true);
-	TMC_softEnable(TMC_FY , true);
-	
 	// X zero
 	command.code = G114;
 	currentIntCommandPtr = &command;
@@ -110,7 +101,7 @@ void InitTask(void) {
 	}
 	// MS1 To Trigger
 	command.code = M107;
-	command.param1 = 0;
+	command.param1 = 1;
 	command.param2 = 200;
 	command.param3 = 0;
 	currentIntCommandPtr = &command;
@@ -132,7 +123,7 @@ void InitTask(void) {
 	}
 	// MS2 To Trigger
 	command.code = M108;
-	command.param1 = 0;
+	command.param1 = 1;
 	command.param2 = 200;
 	command.param3 = 0;
 	currentIntCommandPtr = &command;
