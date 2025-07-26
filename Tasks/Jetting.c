@@ -21,12 +21,15 @@ void StartJettingTask(void *argument) {
 			}
 			if (HAL_UART_Transmit_DMA(&huart7, (uint8_t *)jettingInfo.data, 42) != HAL_OK) {
 				retry--;
+				continue;
 			}
-			else if (osThreadFlagsWait(JETTING_FPGA_REPLY, osFlagsWaitAny, 10) > 0xFFFFFFF0) {
+			if (osThreadFlagsWait(JETTING_FPGA_REPLY, osFlagsWaitAny, 10) > 0xFFFFFFF0) {
 				retry--;
+				continue;
 			}
-			else if (jettingInfo.status != 0x01) {
+			if (jettingInfo.status != 0x01) {
 				retry--;
+				continue;
 
 			} else {
 				osThreadFlagsSet(jettingInfo.threadId, MAIN_TASK_CPLT);

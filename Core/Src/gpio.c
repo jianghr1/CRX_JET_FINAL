@@ -63,7 +63,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, VAC2_CTL_Pin|VAC1_CTL_Pin|MS2_CTL_Pin|MS1_CTL_Pin
+  HAL_GPIO_WritePin(GPIOD, VAC1_CTL_Pin|MS1_CTL_Pin|VAC2_CTL_Pin|MS2_CTL_Pin
                           |UVF_CTL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : VSEL_A_Pin VSEL_B_Pin */
@@ -130,9 +130,9 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(SDIO_CD_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : VAC2_CTL_Pin VAC1_CTL_Pin MS2_CTL_Pin MS1_CTL_Pin
+  /*Configure GPIO pins : VAC1_CTL_Pin MS1_CTL_Pin VAC2_CTL_Pin MS2_CTL_Pin
                            UVF_CTL_Pin */
-  GPIO_InitStruct.Pin = VAC2_CTL_Pin|VAC1_CTL_Pin|MS2_CTL_Pin|MS1_CTL_Pin
+  GPIO_InitStruct.Pin = VAC1_CTL_Pin|MS1_CTL_Pin|VAC2_CTL_Pin|MS2_CTL_Pin
                           |UVF_CTL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;

@@ -1,9 +1,9 @@
 #include "Print.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "Comm.h"
-#include "TMC2209.h"
 #include "fatfs.h"
+#include "Comm.h"
+#include "Jetting.h"
 #include "Init.h"
 
 extern osThreadId_t motorTaskHandle;
@@ -11,6 +11,11 @@ extern osThreadId_t pumpTaskHandle;
 extern osThreadId_t vacTaskHandle;
 extern osThreadId_t headerTaskHandle;
 extern osThreadId_t jettingTaskHandle;
+
+#define CHECK_STATE if ((currentState & 0xF) == GlobalStateEStop || (currentState & 0xF) == GlobalStateError) return
+
+// Implemented In TMC2209.c
+uint8_t _swuart_calcCRC(uint8_t* datagram, uint8_t datagramLength);
 
 uint8_t rx[BLOCKSIZE];
 
@@ -46,23 +51,20 @@ void decodeStr(char* ref) {
 
 void decodeUInt(uint32_t* out) {
 	*out = 0;
-	while (idx < bytesRead && (rx[idx] < '0' || rx['idx'] > '9')) ++idx;
-	while (idx < bytesRead) {
-		if (rx[idx] > '0' && rx[idx] < '9') {
-			*out = *out * 10 + rx[idx] & 0xF;
-		} else {
-			return;
-		}
+	while (idx < bytesRead && (rx[idx] < '0' || rx[idx] > '9')) ++idx;
+	while (idx < bytesRead && (rx[idx] >='0' && rx[idx] <='9')) {
+		*out = *out * 10 + (rx[idx] - '0');
+		++idx;
 	}
 }
 
 void decodeFloat(float* out) {
-	*out = 0;
-	float mul = 0.1;
-	while (idx < bytesRead && (rx[idx] < '0' || rx['idx'] > '9')) ++idx;
+	*out = 0.0f;
+	float mul = 0.1f;
+	while (idx < bytesRead && (rx[idx] < '0' || rx[idx] > '9')) ++idx;
 	while (idx < bytesRead) {
 		if (rx[idx] > '0' && rx[idx] < '9') {
-			*out = *out * 10 + rx[idx] & 0xF;
+			*out = *out * 10 + (rx[idx] - '0');
 		} else if (rx[idx] == '.') {
 			break;
 		} else {
@@ -72,7 +74,7 @@ void decodeFloat(float* out) {
 	while (idx < bytesRead) {
 		if (rx[idx] > '0' && rx[idx] < '9') {
 			*out = *out + (rx[idx] & 0xF) * mul;
-			mul *= 0.1;
+			mul *= 0.1f;
 		} else {
 			return;
 		}
@@ -80,10 +82,10 @@ void decodeFloat(float* out) {
 }
 
 void readLine(void) {
-	uint8* CHA_R = MS1_CH1_List;
-	uint8* CHB_R = MS1_CH2_List[x%16];
-	uint8* CHC_R = MS2_CH1_List[x%64];
-	uint8* CHD_R = MS2_CH2_List[x%64];
+	uint8_t* CHA_R = MS1_CH1_List;
+	uint8_t* CHB_R = MS1_CH2_List[x%16];
+	uint8_t* CHC_R = MS2_CH1_List[x%64];
+	uint8_t* CHD_R = MS2_CH2_List[x%64];
 
 	CHA_R[0] = 0xA8; ++CHA_R;
 	CHB_R[0] = 0xA9; ++CHB_R;
@@ -95,7 +97,7 @@ void readLine(void) {
 		{
 			f_res = f_read(&myFile, rx, sizeof(rx), &bytesRead);
 			if (f_res != FR_OK) {
-				usb_print("Failed to read file");
+				usb_printf("Failed to read file");
 				EmergencyStop(GlobalStateError);
 				// Handle error
 				return;
@@ -105,21 +107,21 @@ void readLine(void) {
 		if ((rx[idx] >> 4) == 0) {
 			// MS1
 			CHA_R[y/8] |= 1<<(7-(y%8));
-			CHC_R[y/8] &= 0xFF - 1<<(7-(y%8));
+			CHC_R[y/8] &= ~(1<<(7-(y%8)));
 		} else {
 			// MS2
 			CHC_R[y/4] |= 1<<(7-(y%8));
-			CHA_R[y/8] &= 0xFF - 1<<(7-(y%8));
+			CHA_R[y/8] &= ~(1<<(7-(y%8)));
 		}
 		
 		if ((rx[idx] & 0xF) == 0) {
 			// MS1
 			CHB_R[y/8] |= 1<<(7-(y%8));
-			CHD_R[x%64][y/8] &= 0xFF - 1<<(7-(y%8));
+			CHD_R[y/8] &= ~(1<<(7-(y%8)));
 		} else {
 			// MS2
-			CHD_R[y/4] |= 1<<(7-(y%8));
-			CHB_R[y/8] &= 0xFF - 1<<(7-(y%8));
+			CHD_R[y/8] |= 1<<(7-(y%8));
+			CHB_R[y/8] &= ~(1<<(7-(y%8)));
 		}
 	}
 	if (y % 8 != 0)
@@ -153,32 +155,32 @@ void decodeHeader(void) {
 	decodeStr("stepsize z");
 	decodeFloat(&stepsize_z);
 	decodeStr("size x");
-	decodeInt(&size_x);
+	decodeUInt(&size_x);
 	decodeStr("size y");
-	decodeInt(&size_y);
+	decodeUInt(&size_y);
 	decodeStr("size z");
-	decodeInt(&size_z);
+	decodeUInt(&size_z);
 	decodeStr("end header");
 }
 
 void PrintTaskPrepare(void) {
 	f_res = f_mount(&myFatFs, "0:", 1);
 	if (f_res != FR_OK) {
-		usb_print("Failed to mount filesystem");
+		usb_printf("Failed to mount filesystem");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
 	}
 	f_res = f_open(&myFile, "amount.txt", FA_OPEN_EXISTING | FA_READ);
 	if (f_res != FR_OK) {
-		usb_print("Failed to open file");
+		usb_printf("Failed to open file");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
 	}
 	f_res = f_read(&myFile, rx, sizeof(rx), &bytesRead);
 	if (f_res != FR_OK) {
-		usb_print("Failed to read file");
+		usb_printf("Failed to read file");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
@@ -186,6 +188,7 @@ void PrintTaskPrepare(void) {
 
 	//Decode Header
 	decodeHeader();
+	z = 0;
 	
 	//Init EveryThing
 	InitTask();
@@ -202,30 +205,22 @@ void PrintTask(void) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalSteteError)
-	{
-		return;
-	}
+	CHECK_STATE;
 
-	for (z = 0; z < size_z; z++) {
+	for (; z < size_z; z++) {
 		if (currentState == GlobalStatePause) {
 			
 		}
 
 		for (x = 0; x < size_x; x++) {
 			readLine();
-			if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-			{
-				return;
-			}
+			CHECK_STATE;
 			// currently, We only Consider Channel A
-			jettingInfo.data = MS1_CH1_List;
+			jettingInfo.data = (Jetting_t *)MS1_CH1_List;
 			// jettingInfo.threadId = TBD
 			osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
 			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-			if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
-				return;
-			}
+			CHECK_STATE;
 			
 			// Move To Next Position
 			command.code = G110;
@@ -235,21 +230,19 @@ void PrintTask(void) {
 			currentIntCommandPtr = &command;
 			osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
 			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-			if (currentState == GlobalStateEStop || currentState == GlobalSteteError) {
-				return;
-			}
+			CHECK_STATE;
 		}
 	}
 	f_res = f_close(&myFile);
 	if (f_res != FR_OK) {
-		usb_print("Failed to close file");
+		usb_printf("Failed to close file");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
 	}
 	f_res = f_mount(NULL, "0:", 1);
 	if (f_res != FR_OK) {
-		usb_print("Failed to unmount filesystem");
+		usb_printf("Failed to unmount filesystem");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;

@@ -51,13 +51,12 @@ typedef enum {
 } GMCode;
 
 struct GMCommand {
-	uint32_t cid;
 	GMCode   code;
 	int32_t  param1;
 	int32_t  param2;
 	float    param3;
-	uint8_t  num_params;
-	uint8_t  command_source;
+	uint16_t  numParams;
+	uint16_t  commandSource;
 };
 
 typedef enum {
@@ -69,6 +68,7 @@ typedef enum {
 	GlobalStatePOff  = 5,
 	GlobalStateError = 6,
 	GlobalStateEStop = 7,
+	GlobalStatePauseReq = 0x10
 } GlobalState_t;
 
 typedef union {
@@ -92,6 +92,7 @@ typedef struct {
 	int16_t x_encoder_pos;
 	uint8_t motor_state;
 	TriggerState_t trigger_state;
+	char fpath[32];
 } GlobalInfo_t;
 
 typedef struct {
@@ -115,5 +116,9 @@ void Comm_Put_Queue_CPLT(void);
 uint8_t usb_printf(const char *format, ...);
 
 void EmergencyStop(GlobalState_t issue);
+
+void GlobalInit();
+
+void DecodeCDC(uint8_t *data, uint32_t len);
 
 #endif//_COMM_H

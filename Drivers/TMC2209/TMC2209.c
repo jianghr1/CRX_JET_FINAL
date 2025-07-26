@@ -52,7 +52,7 @@ ________________________________________________________________________________
 //=======================================================================================
 static uint8_t TMC_readRegister(TMC* self, uint8_t reg_addr);
 static uint8_t TMC_writeRegister(TMC* self, uint8_t reg_addr, uint32_t data);
-static uint8_t _swuart_calcCRC(uint8_t* datagram, uint8_t datagramLength);
+uint8_t _swuart_calcCRC(uint8_t* datagram, uint8_t datagramLength);
 static uint32_t _TMC_read32bit(void);
 
 
@@ -280,7 +280,7 @@ static uint8_t TMC_writeRegister(TMC* self, uint8_t reg_addr, uint32_t data){
 	
 	returns the crc
 ------------------------------------------------------------------------------*/
-static uint8_t _swuart_calcCRC(uint8_t* datagram, uint8_t datagramLength){
+uint8_t _swuart_calcCRC(uint8_t* datagram, uint8_t datagramLength){
 	uint8_t i, j;
 	uint8_t currentByte;
 	uint8_t crc = 0;

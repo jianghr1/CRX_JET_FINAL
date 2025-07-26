@@ -1,5 +1,6 @@
 #include "Comm.h"
 #include <stdarg.h>
+#include <ctype.h>
 #include "usbd_cdc_if.h"
 #include "cmsis_os.h"
 #include "TMC2209.h"
@@ -13,6 +14,18 @@ TriggerHandler_t triggerHandler;
 GMCommand_t commIntQueue[COMM_QUEUE_SIZE];
 uint32_t commIntQueueHead;
 uint32_t commIntQueueTail;
+
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim8;
+extern TIM_HandleTypeDef htim9;
+extern osThreadId_t defaultTaskHandle;
+extern osThreadId_t motorTaskHandle;
+extern osThreadId_t pumpTaskHandle;
+extern osThreadId_t vacTaskHandle;
+extern osThreadId_t headerTaskHandle;
+extern osThreadId_t jettingTaskHandle;
 
 void Comm_Init_Queue(void) {
 	commIntQueueHead = 0;
@@ -61,14 +74,6 @@ uint8_t usb_printf(const char *format, ...) {
 }
 
 void EmergencyStop(GlobalState_t issue) {
-	extern TIM_HandleTypeDef htim2;
-	extern TIM_HandleTypeDef htim9;
-	extern osThreadId_t defaultTaskHandle;
-	extern osThreadId_t motorTaskHandle;
-	extern osThreadId_t pumpTaskHandle;
-	extern osThreadId_t vacTaskHandle;
-	extern osThreadId_t headerTaskHandle;
-	extern osThreadId_t jettingTaskHandle;
 	// First: Set ESTOP State
 	currentState = issue;
 	// Second: Trigger Low Level Thread
@@ -87,17 +92,214 @@ void EmergencyStop(GlobalState_t issue) {
 	HAL_GPIO_WritePin(VAC2_CTL_GPIO_Port, VAC2_CTL_Pin, GPIO_PIN_RESET);
 	// B: UV Lights
 	HAL_GPIO_WritePin(UVF_CTL_GPIO_Port , UVF_CTL_Pin , GPIO_PIN_RESET);
-	htim2.Instance->CCR2 = 0;
-	// C: Heater
-	htim9.Instance->CCR1 = 0;
-	// D: Motors
-	TMC_softEnable(TMC_MX , false);
-	TMC_softEnable(TMC_MZ1, false);
-	TMC_softEnable(TMC_MZ2, false);
-	// E: Pumps
-	TMC_softEnable(TMC_VAC, false);
-	TMC_softEnable(TMC_MS1, false);
-	TMC_softEnable(TMC_MS2, false);
-	TMC_softEnable(TMC_QJ , false);
-	TMC_softEnable(TMC_FY , false);
+	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
+	// Heater
+	HAL_TIM_PWM_Stop(&htim9, TIM_CHANNEL_1);
+	// Motors
+	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim8, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim8, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Stop(&htim8, TIM_CHANNEL_4);
+	// Pumps
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
+}
+
+void GlobalInit() {
+	// Motors
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
+	// Pumps
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
+
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
+}
+
+typedef enum {
+	GMCode_GM,
+	GMCode_X1,
+	GMCode_X2,
+	GMCode_X3,
+	GMCode_Param1,
+	GMCode_Param2,
+	GMCode_Param3,
+	GMCode_FPATH,
+	GMCode_Jump,
+} DecoderState_t;
+
+void DecodeNumParam(GMCommand_t *procCommand) {
+	if (procCommand->code == M105) {
+		procCommand->numParams = 1;
+	} else if (procCommand->code == M106) {
+		procCommand->numParams = 1;
+	} else if (procCommand->code == M120) {
+		procCommand->numParams = 1;
+	} else if (procCommand->code >= 30  && procCommand->code <=41) {
+		procCommand->numParams = 1;
+	} else if (procCommand->code == M122) {
+		procCommand->numParams = 2;
+	} else if (procCommand->code == M171) {
+		procCommand->numParams = 2;
+	} else if (procCommand->code >= 50 && procCommand->code <=70) {
+		procCommand->numParams = 0;
+	} else {
+		procCommand->numParams = 3;
+	}
+}
+
+void DecodeCDC(uint8_t *data, uint32_t len) {
+	static DecoderState_t state;
+	static GMCommand_t* procCommand;
+	uint32_t i = 0;
+	uint32_t j = 0;
+	while (i < len) {
+		uint8_t ch = data[i];
+		switch(state) {
+			case GMCode_GM: {
+				if (ch == 'M' || ch == 'G') {
+					state = GMCode_X1;
+				}
+				break;
+			}
+			case GMCode_X1: {
+				if (ch == '1') {
+					state = GMCode_X2;
+					procCommand = Comm_Put_Queue();
+					procCommand->code = 0;
+					procCommand->commandSource = 1;
+				} else {
+					state = GMCode_GM;
+				}
+				break;
+			}
+			case GMCode_X2: {
+				if (ch >= '0' && ch <= '9') {
+					state = GMCode_X3;
+					procCommand->code = (ch - '0') * 10;
+				} else {
+					state = GMCode_GM;
+				}
+				break;
+			}
+			case GMCode_X3: {
+				if (ch >= '0' && ch <= '9') {
+					procCommand->code += (ch - '0');
+					if (procCommand->code == M172) {
+						j = 0;
+						state = GMCode_FPATH;
+					} else {
+						DecodeNumParam(procCommand);
+						if (procCommand->numParams == 0) {
+							state = GMCode_GM;
+							Comm_Put_Queue_CPLT();
+						} else {
+							procCommand->param1 = 0;
+							state = GMCode_Param1;
+						}
+					}
+				} else {
+					state = GMCode_GM;
+				}
+				break;
+			}
+			case GMCode_Param1: {
+				while (i < len && (data[i] < '0' || data[i] > '9')) ++i;
+				while (i < len && (data[i] > '0' && data[i] < '9')) {
+					procCommand->param1 = procCommand->param1 * 10 + data[i] - '0';
+					++i;
+				}
+				if (i == len) {
+					break;
+				} else {
+					if (procCommand->numParams > 1) {
+						procCommand->param2 = 0;
+						state = GMCode_Param2;
+					} else {
+						state = GMCode_GM;
+						Comm_Put_Queue_CPLT();
+						break;
+					}
+				}
+			}
+			case GMCode_Param2: {
+				while (i < len && (data[i] < '0' || data[i] > '9')) ++i;
+				while (i < len && (data[i] > '0' && data[i] < '9')) {
+					procCommand->param2 = procCommand->param2 * 10 + data[i] - '0';
+					++i;
+				}
+				if (i == len) {
+					break;
+				} else {
+					if (procCommand->numParams > 2) {
+						procCommand->param3 = 0.0f;
+						state = GMCode_Param3;
+					} else {
+						state = GMCode_GM;
+						Comm_Put_Queue_CPLT();
+						break;
+					}
+				}
+			}
+			case GMCode_Param3: {
+				while (i < len && (data[i] < '0' || data[i] > '9')) ++i;
+				while (i < len && (data[i] > '0' && data[i] < '9')) {
+					procCommand->param3 = procCommand->param3 * 10 + data[i] - '0';
+					++i;
+				}
+				if (i < len) {
+					state = GMCode_GM;
+					Comm_Put_Queue_CPLT();
+				}
+				break;
+			}
+			case GMCode_FPATH: {
+				while (i < len && !isgraph(data[i])) ++i;
+				for (; i < len && isgraph(data[i]); ++i, ++j) {
+					globalInfo.fpath[j] = data[i];
+				}
+				if (i < len) {
+					state = GMCode_GM;
+					Comm_Put_Queue_CPLT();
+				}
+				break;
+			}
+			case GMCode_Jump: {
+				while (i < len && (data[i] < '0' || data[i] > '9')) ++i;
+				switch (data[i]) {
+					case '3': {
+						currentState |= GlobalStatePauseReq;
+					}
+					case '0': 
+					case '1': 
+					case '2':
+					case '5':
+					case '6': {
+						procCommand->param1 = data[i] - '0';
+						Comm_Put_Queue_CPLT();
+						break;
+					}
+					case '7': {
+						EmergencyStop(GlobalStateEStop);
+						break;
+					}
+					case '4': {
+						procCommand->param1 = 4;
+						while (i < len && !isgraph(data[i])) ++i;
+						procCommand->param2 = data[i] - '0';
+						Comm_Put_Queue_CPLT();
+						break;
+					}
+				}
+			}
+		}
+		++i;
+	}
 }
