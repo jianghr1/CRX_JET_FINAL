@@ -12,6 +12,8 @@
 #define MOTOR_Z_MOVE_DIRECTION (1 - currentIntCommandPtr->param1 * 2)
 #define MOTOR_TRIGGERED_LVL GPIO_PIN_SET
 
+#define CHECK_STATE if ((currentState & 0xF) == GlobalStateEStop || (currentState & 0xF) == GlobalStateError) {osMutexRelease(MUart1MutexHandle); osMutexRelease(MTim8MutexHandle); osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT); }
+
 extern osThreadId_t defaultTaskHandle;
 extern osMutexId_t MUart1MutexHandle;
 extern osMutexId_t MTim8MutexHandle;
@@ -66,11 +68,7 @@ void StartMotorTask(void* arg) {
 				TMC_move(TMC_MZ2, MOTOR_Z_MM_TO_ESTEP * currentIntCommandPtr->param3 * MOTOR_Z_MOVE_DIRECTION);
 				osMutexRelease(MUart1MutexHandle);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
 				osMutexRelease(MTim8MutexHandle);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
@@ -88,28 +86,16 @@ void StartMotorTask(void* arg) {
 				TMC_setSpeed(TMC_MX, 10 * MOTOR_X_MM_TO_ESTEP);
 				TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * 800 * MOTOR_X_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MX);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				triggerHandler.MX = 0;
 				TMC_move(TMC_MX, - 2 * MOTOR_X_MM_TO_ESTEP * MOTOR_X_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MX);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				triggerHandler.MX = TMC_MX;
 				TMC_setSpeed(TMC_MX, 0.5 * MOTOR_X_MM_TO_ESTEP);
 				TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * 800 * MOTOR_X_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MX);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				triggerHandler.MX = 0;
 				TMC_moveTo(TMC_MX, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_X_HOME_DIRECTION);
 				triggerHandler.MX = TMC_MX;
@@ -133,99 +119,44 @@ void StartMotorTask(void* arg) {
 					TMC_move(TMC_MZ2, - 10 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				}
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				osDelay(10);
 				triggerHandler.MZ1 = TMC_MZ1;
 				triggerHandler.MZ2 = TMC_MZ2;
 				TMC_move(TMC_MZ1, MOTOR_Z_MM_TO_ESTEP * 100 * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, MOTOR_Z_MM_TO_ESTEP * 100 * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				triggerHandler.MZ1 = 0;
 				triggerHandler.MZ2 = 0;
 				TMC_move(TMC_MZ1, - 2 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, - 2 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				osDelay(10);
 				TMC_wait_motor_stop(TMC_VAC);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				triggerHandler.MZ1 = TMC_MZ1;
 				triggerHandler.MZ2 = TMC_MZ2;
 				TMC_setSpeed(TMC_MZ1, 0.5 * MOTOR_Z_MM_TO_ESTEP);
 				TMC_move(TMC_MZ1, MOTOR_Z_MM_TO_ESTEP * 100 * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, MOTOR_Z_MM_TO_ESTEP * 100 * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				TMC_move(TMC_MZ1, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
-				if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
-					osMutexRelease(MUart1MutexHandle);
-					osMutexRelease(MTim8MutexHandle);
-					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-					break;
-				}
+				CHECK_STATE;
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);

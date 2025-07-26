@@ -6,6 +6,8 @@
 
 #define PUMP_CCW_DEGREE 2000
 
+#define CHECK_STATE if ((currentState & 0xF) == GlobalStateEStop || (currentState & 0xF) == GlobalStateError) return
+
 extern osThreadId_t motorTaskHandle;
 extern osThreadId_t pumpTaskHandle;
 extern osThreadId_t vacTaskHandle;
@@ -20,50 +22,35 @@ void CleanTask(int32_t channel) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	
 	// VAC1 Open
 	command.code = M132;
 	command.param1 = (channel)? 1: 0;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// VAC2 Close
 	command.code = M133;
 	command.param1 = (channel)? 0: 1;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// VAC Set Target
 	command.code = M105;
 	command.param1 = -5000;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// VAC Start
 	command.code = M106;
 	command.param1 = 1;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// MS1 Rotate CCW
 	command.code = M100+channel;
 	command.param1 = 1;
@@ -72,20 +59,14 @@ void CleanTask(int32_t channel) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// QJ set to MS
 	command.code = M130+channel;
 	command.param1 = 1;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// QJ To Trigger
 	command.code = M107+channel;
 	command.param1 = 0;
@@ -94,10 +75,7 @@ void CleanTask(int32_t channel) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// QJ Jetting
 	command.code = M121;
 	command.param1 = 0+channel;
@@ -106,10 +84,7 @@ void CleanTask(int32_t channel) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// QJ Rotate CCW
 	command.code = M102;
 	command.param1 = 1;
@@ -118,19 +93,11 @@ void CleanTask(int32_t channel) {
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
+	CHECK_STATE;
 	// MS1 Set To MS
 	command.code = M130+channel;
 	command.param1 = 0;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-	if (currentState == GlobalStateEStop || currentState == GlobalStateError)
-	{
-		return;
-	}
-
 }
