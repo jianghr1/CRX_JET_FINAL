@@ -45,6 +45,7 @@ ________________________________________________________________________________
 
 #include "TMC2209.h"
 #include "main.h"
+#include "Comm.h"
 #include "cmsis_os.h"
 
 //=======================================================================================
@@ -198,6 +199,7 @@ static uint8_t TMC_readRegister(TMC* self, uint8_t reg_addr){
 	COMM_ERROR:
 		if(retry--) goto RETRY;
 		self->comm_failure = true;
+		EmergencyStop(GlobalStateError);
 		return 1;
 }
 
@@ -265,6 +267,7 @@ static uint8_t TMC_writeRegister(TMC* self, uint8_t reg_addr, uint32_t data){
 	COMM_ERROR:
 		if(retry--) goto RETRY;
 		self->comm_failure = true;
+		EmergencyStop(GlobalStateError);
 		return 1;
 }
 
