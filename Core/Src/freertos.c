@@ -220,6 +220,7 @@ void StartDefaultTask(void *argument)
 	TMC_init(TMC_MS2, MRES_16);
 	TMC_init(TMC_FY , MRES_16);
 	TMC_init(TMC_QJ , MRES_16);
+	GlobalInit();
   /* Infinite loop */
   for(;;)
   {
@@ -233,74 +234,74 @@ void StartDefaultTask(void *argument)
 			if (currentIntCommandPtr == 0)
 			{
 				continue;
-			} else if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
-			{
-				// Dispatch To Pump Thread
-				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >= 4 && currentIntCommandPtr->code <= 6)
-			{
-				// Dispatch To Motor Thread
-				osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >= 7 && currentIntCommandPtr->code <= 8)
-			{
-				// Dispatch To Pump Thread
-				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=19)
-			{
-				// Dispatch To Motor Thread
-				osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=29)
-			{
-				// Dispatch To Header Thread
-				osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=49)
-			{
-				// Dispatch To Pump Thread
-				osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
-			} else if (currentIntCommandPtr->code >=50 && currentIntCommandPtr->code <=70)
-			{
-				// Query
-			} else if (currentIntCommandPtr->code == M171)
-			{
-				//
-				switch(currentIntCommandPtr->param1) {
-					case GlobalStateInit: {
-						if (currentState != GlobalStatePrint && currentState != GlobalStateClean) {
-							usb_printf("OK");
-							InitTask();
-						} else {
-							usb_printf("ERROR");
-						}
-						break;
-					}
-					case GlobalStatePOff: {
-						if (currentState == GlobalStateIdle) {
-							usb_printf("OK");
-							
-						} else {
-							usb_printf("ERROR");
-						}
-						break;
-					}
-					case GlobalStateClean: {
-						if (currentState == GlobalStateIdle) {
-							usb_printf("OK");
-							CleanTask(currentIntCommandPtr->param2);
-						} else {
-							usb_printf("ERROR");
-						}
-						break;
-					}
-					case GlobalStateEStop: {
-						usb_printf("OK");
-						break;
-					}
-					default:
-						usb_printf("ERROR");
-				}
-				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-			}
-			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+      } else if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
+		 	{
+		 		// Dispatch To Pump Thread
+		 		osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		 	} else if (currentIntCommandPtr->code >= 4 && currentIntCommandPtr->code <= 6)
+		 	{
+		 		// Dispatch To Motor Thread
+		 		osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
+		 	} else if (currentIntCommandPtr->code >= 7 && currentIntCommandPtr->code <= 8)
+		 	{
+		 		// Dispatch To Pump Thread
+		 		osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		 	} else if (currentIntCommandPtr->code >=10 && currentIntCommandPtr->code <=19)
+		 	{
+		 		// Dispatch To Motor Thread
+		 		osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
+		 	} else if (currentIntCommandPtr->code >=20 && currentIntCommandPtr->code <=29)
+		 	{
+		 		// Dispatch To Header Thread
+		 		osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
+		 	} else if (currentIntCommandPtr->code >=30 && currentIntCommandPtr->code <=49)
+		 	{
+		 		// Dispatch To Pump Thread
+		 		osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		 	} else if (currentIntCommandPtr->code >=50 && currentIntCommandPtr->code <=70)
+		 	{
+		 		// Query
+		 	} else if (currentIntCommandPtr->code == M171)
+		 	{
+		 		//
+		 		switch(currentIntCommandPtr->param1) {
+		 			case GlobalStateInit: {
+		 				if (currentState != GlobalStatePrint && currentState != GlobalStateClean) {
+		 					usb_printf("OK");
+		 					InitTask();
+		 				} else {
+		 					usb_printf("ERROR");
+		 				}
+		 				break;
+		 			}
+		 			case GlobalStatePOff: {
+		 				if (currentState == GlobalStateIdle) {
+		 					usb_printf("OK");
+						
+		 				} else {
+		 					usb_printf("ERROR");
+		 				}
+		 				break;
+		 			}
+		 			case GlobalStateClean: {
+		 				if (currentState == GlobalStateIdle) {
+		 					usb_printf("OK");
+		 					CleanTask(currentIntCommandPtr->param2);
+		 				} else {
+		 					usb_printf("ERROR");
+		 				}
+		 				break;
+		 			}
+		 			case GlobalStateEStop: {
+		 				usb_printf("OK");
+		 				break;
+		 			}
+		 			default:
+		 				usb_printf("ERROR");
+		 		}
+		 		osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+		 	}
+		 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 		}
   }
   /* USER CODE END StartDefaultTask */

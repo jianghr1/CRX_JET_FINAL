@@ -56,9 +56,9 @@ void InitTask(void) {
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
-	// VAC2 Close
+	// VAC2 Open
 	command.code = M133;
-	command.param1 = 1;
+	command.param1 = 0;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
@@ -77,28 +77,62 @@ void InitTask(void) {
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
+	while(globalInfo.vac_pressure > -4500) {
+		osDelay(500);
+		CHECK_STATE;
+	}
 	// MS1 To Trigger
+	command.code = M100;
+	command.param1 = 0;
+	command.param2 = 180;
+	command.param3 = 720;
+	currentIntCommandPtr = &command;
+	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+	CHECK_STATE;
 	command.code = M107;
 	command.param1 = 1;
-	command.param2 = 200;
+	command.param2 = 36;
 	command.param3 = 0;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
-	// VAC2 Open
-	command.code = M133;
-	command.param1 = 0;
+	osDelay(500);
+	command.code = M100;
+	command.param1 = 1;
+	command.param2 = 36;
+	command.param3 = 120;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
+	osDelay(500);
 	// MS2 To Trigger
+	command.code = M101;
+	command.param1 = 0;
+	command.param2 = 180;
+	command.param3 = 720;
+	currentIntCommandPtr = &command;
+	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+	CHECK_STATE;
+	osDelay(500);
 	command.code = M108;
 	command.param1 = 1;
-	command.param2 = 200;
+	command.param2 = 36;
 	command.param3 = 0;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+	CHECK_STATE;
+	osDelay(500);
+	command.code = M101;
+	command.param1 = 1;
+	command.param2 = 36;
+	command.param3 = 120;
+	currentIntCommandPtr = &command;
+	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+	CHECK_STATE;
 }

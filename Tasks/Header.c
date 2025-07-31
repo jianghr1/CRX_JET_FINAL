@@ -2,17 +2,25 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "Comm.h"
+#include "Jetting.h"
 
 extern osThreadId_t defaultTaskHandle;
+extern osThreadId_t headerTaskHandle;
+extern osThreadId_t jettingTaskHandle;
 extern SPI_HandleTypeDef hspi1, hspi4;
 extern TIM_HandleTypeDef htim9;
+float K = 9.5e-3f;
+float B = -5.0f;
 void StartHeaderTask(void *argument) {
 	static uint8_t VoltageR;
-	static uint32_t flag;
+	static Jetting_t jetting;
+	jetting.SOF = 0x2A;
+	for(uint8_t i = 0; i < 40; ++i) jetting.data[i] = 0xFF;
+	
 	while(1)
 	{
 		// Wait Forever Until This Thread Task Notified
-		flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+		osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	
 		switch(currentIntCommandPtr->code)
 		{
@@ -22,41 +30,53 @@ void StartHeaderTask(void *argument) {
 				break;
 			}
 			case M121: {
-				osDelay(1000);
+				jettingInfo.threadId = headerTaskHandle;
+				jetting.channel = currentIntCommandPtr->param1;
+				for (uint32_t i = 0; i < currentIntCommandPtr->param3; i++) {
+					uint32_t tick = HAL_GetTick() + 1000 / currentIntCommandPtr->param2;
+					jettingInfo.data = &jetting;
+					osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
+					osThreadFlagsWait(MAIN_TASK_CPLT, osFlagsWaitAny, osWaitForever);
+					if (HAL_GetTick() < tick)
+					{
+						osDelayUntil(tick);
+					}
+				}
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M122: {
-				VoltageR = currentIntCommandPtr->param1 * 9.7513e-3f + 2.5076f;
+				VoltageR = currentIntCommandPtr->param2 * K + B;
 				switch (currentIntCommandPtr->param1)
 				{
 					case 0: {
 						HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, GPIO_PIN_RESET);
-						HAL_SPI_Transmit(&hspi4, &VoltageR, 8, 10);
+						HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
 						HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, GPIO_PIN_SET);
 						break;
 					}
 					case 1: {
 						HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, GPIO_PIN_RESET);
-						HAL_SPI_Transmit(&hspi4, &VoltageR, 8, 10);
+						HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
 						HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, GPIO_PIN_SET);
 						break;
 					}
 					case 2: {
 						HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, GPIO_PIN_RESET);
-						HAL_SPI_Transmit(&hspi1, &VoltageR, 8, 10);
+						HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
 						HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, GPIO_PIN_SET);
 						break;
 					}
 					case 3: {
 						HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, GPIO_PIN_RESET);
-						HAL_SPI_Transmit(&hspi1, &VoltageR, 8, 10);
+						HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
 						HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, GPIO_PIN_SET);
 						break;
 					}
 					default:
 						__NOP;
 				}
+				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 			}
 			default: 
 				__NOP;

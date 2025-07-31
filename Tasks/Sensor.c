@@ -21,14 +21,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	static uint32_t last_trigger_time_ms2 = 0;
 	switch (GPIO_Pin)
 	{
-		case N_CRC_FAIL_Pin:
-			jettingInfo.status = 1;
+		case N_CRC_FAIL_Pin: {
+			jettingInfo.status |= 2;
 			osThreadFlagsSet(jettingTaskHandle, JETTING_FPGA_REPLY);
 			break;
-		case JETTING_Pin:
-			jettingInfo.status = 2;
+		}
+		case JETTING_Pin: {
+			jettingInfo.status |= 1;
 			osThreadFlagsSet(jettingTaskHandle, JETTING_FPGA_REPLY);
 			break;
+		}
 		case MX_TRIG_Pin:
 			if (HAL_GetTick() - last_trigger_time_mx  > 100)
 			{
