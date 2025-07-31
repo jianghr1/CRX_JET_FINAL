@@ -97,6 +97,7 @@ void StartMotorTask(void* arg) {
 				TMC_wait_motor_stop(TMC_MX);
 				CHECK_STATE;
 				triggerHandler.MX = 0;
+				TMC_setSpeed(TMC_MX, 5 * MOTOR_X_MM_TO_ESTEP);
 				TMC_moveTo(TMC_MX, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_X_HOME_DIRECTION);
 				triggerHandler.MX = TMC_MX;
 				osMutexRelease(MUart1MutexHandle);

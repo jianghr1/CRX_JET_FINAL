@@ -14,8 +14,6 @@ extern osThreadId_t jettingTaskHandle;
 
 #define CHECK_STATE if ((currentState & 0xF) == GlobalStateEStop || (currentState & 0xF) == GlobalStateError) return
 
-// Implemented In TMC2209.c
-uint8_t _swuart_calcCRC(uint8_t* datagram, uint8_t datagramLength);
 
 uint8_t rx[BLOCKSIZE];
 
@@ -23,6 +21,8 @@ FATFS myFatFs;
 FIL myFile;
 FRESULT f_res;
 uint32_t bytesRead;
+FILINFO fno;
+DIR dir;
 
 float zeropos_x;
 float stepsize_x;
@@ -139,10 +139,6 @@ void readLine(void) {
 		CHC_R[y/8] = 0;
 		CHD_R[y/8] = 0;
 	}
-	CHA_R[40] = _swuart_calcCRC(CHA_R-1, 42);
-	CHB_R[40] = _swuart_calcCRC(CHB_R-1, 42);
-	CHC_R[40] = _swuart_calcCRC(CHC_R-1, 42);
-	CHD_R[40] = _swuart_calcCRC(CHD_R-1, 42);
 }
 
 void decodeHeader(void) {
@@ -244,6 +240,46 @@ void PrintTask(void) {
 	if (f_res != FR_OK) {
 		usb_printf("Failed to unmount filesystem");
 		EmergencyStop(GlobalStateError);
+		// Handle error
+		return;
+	}
+}
+
+
+void ReadFileList(void) {
+	f_res = f_mount(&myFatFs, "0:", 1);
+	if (f_res != FR_OK) {
+		usb_printf("Failed to mount filesystem");
+		// Handle error
+		return;
+	}
+	f_res = f_opendir(&dir, "");
+	if (f_res != FR_OK) {
+		usb_printf("Failed to openDir");
+		// Handle error
+		return;
+	}
+	while(1) {
+		f_res = f_readdir(&dir, &fno);
+		if (f_res != FR_OK) {
+			usb_printf("Failed to ReadDir");
+			return;
+		}
+		if (fno.fname[0] == 0)
+		{
+			break;
+		}
+	}
+	f_res = f_closedir(&dir);
+	if (f_res != FR_OK) {
+		usb_printf("Failed to CloseDir");
+		// Handle error
+		return;
+	}
+	
+	f_res = f_mount(NULL, "0:", 1);
+	if (f_res != FR_OK) {
+		usb_printf("Failed to unmount filesystem");
 		// Handle error
 		return;
 	}

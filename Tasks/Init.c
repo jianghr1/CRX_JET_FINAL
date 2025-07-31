@@ -85,7 +85,7 @@ void InitTask(void) {
 	command.code = M100;
 	command.param1 = 0;
 	command.param2 = 180;
-	command.param3 = 720;
+	command.param3 = 1800;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
@@ -102,7 +102,7 @@ void InitTask(void) {
 	command.code = M100;
 	command.param1 = 1;
 	command.param2 = 36;
-	command.param3 = 120;
+	command.param3 = 60;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
@@ -112,7 +112,7 @@ void InitTask(void) {
 	command.code = M101;
 	command.param1 = 0;
 	command.param2 = 180;
-	command.param3 = 720;
+	command.param3 = 1800;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
@@ -130,7 +130,7 @@ void InitTask(void) {
 	command.code = M101;
 	command.param1 = 1;
 	command.param2 = 36;
-	command.param3 = 120;
+	command.param3 = 60;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);

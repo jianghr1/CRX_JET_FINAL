@@ -2,4 +2,5 @@
 #define _Print_H
 
 void PrintTask(void);
+void ReadFileList(void);
 #endif//_Print_H

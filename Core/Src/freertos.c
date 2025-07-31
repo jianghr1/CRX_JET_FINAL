@@ -300,7 +300,10 @@ void StartDefaultTask(void *argument)
 		 				usb_printf("ERROR");
 		 		}
 		 		osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-		 	}
+		 	} else if (currentIntCommandPtr->code == M180) {
+				ReadFileList();
+		 		osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+			}
 		 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 		}
   }
@@ -311,3 +314,4 @@ void StartDefaultTask(void *argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
+

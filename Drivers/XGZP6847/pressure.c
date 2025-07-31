@@ -5,7 +5,7 @@
 HAL_StatusTypeDef Pressure_Init(I2C_HandleTypeDef *hi2c)
 {
 	
-    uint8_t cmd = 0x1B; // Sleep Mode + 62.5 ms
+    uint8_t cmd = 0x0A; // Sleep Mode + 62.5 ms
 
     // Start measurement
     return HAL_I2C_Mem_Write(hi2c, PRESSURE_I2C_ADDR, 0x30, I2C_MEMADD_SIZE_8BIT, &cmd, 1, 100);
@@ -17,6 +17,10 @@ HAL_StatusTypeDef Pressure_Read(I2C_HandleTypeDef *hi2c)
     uint8_t pressure_buf[3];
     uint32_t pressure_adc;
 	
+    uint8_t cmd = 0x0A; // Sleep Mode + 62.5 ms
+    // Start measurement
+    HAL_I2C_Mem_Write(hi2c, PRESSURE_I2C_ADDR, 0x30, I2C_MEMADD_SIZE_8BIT, &cmd, 1, 100);
+    osDelay(20);
     // Read pressure data
     if (HAL_I2C_Mem_Read(hi2c, PRESSURE_I2C_ADDR, 0x06, I2C_MEMADD_SIZE_8BIT, pressure_buf, 3, 100) != HAL_OK)
         return HAL_ERROR;
@@ -26,16 +30,5 @@ HAL_StatusTypeDef Pressure_Read(I2C_HandleTypeDef *hi2c)
         globalInfo.vac_pressure = ((int32_t)pressure_adc - 16777216) / (float)PRESSURE_K_VALUE;
     else
         globalInfo.vac_pressure = pressure_adc / (float)PRESSURE_K_VALUE;
-
-//    // Read temperature data
-//    if (HAL_I2C_Mem_Read(hi2c, PRESSURE_I2C_ADDR, 0x09, I2C_MEMADD_SIZE_8BIT, temp_buf, 2, 100) != HAL_OK)
-//        return HAL_ERROR;
-
-//    temp_adc = (temp_buf[0] << 8) | temp_buf[1];
-//    if (temp_adc & 0x8000)
-//        data->temperature = ((int16_t)temp_adc - 65536) / 256.0f;
-//    else
-//        data->temperature = temp_adc / 256.0f;
-
     return HAL_OK;
 }

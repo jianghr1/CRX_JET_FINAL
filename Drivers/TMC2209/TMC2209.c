@@ -753,12 +753,12 @@ void TMC_move(TMC* self, float relative){
 	}
 	else if (relative > 0 && self->global_config.gconf.shaft == 0)
 	{
-		self->tim_ptr->steps[self->tim_channel] += relative * self->stepDivision;
+		self->tim_ptr->steps[self->tim_channel] += relative * self->stepDivision * 2;
 		self->current_pos += relative;
 	}
 	else if (relative < 0 && self->global_config.gconf.shaft == 1)
 	{
-		self->tim_ptr->steps[self->tim_channel] += (-relative) * self->stepDivision;
+		self->tim_ptr->steps[self->tim_channel] += (-relative) * self->stepDivision * 2;
 		self->current_pos += relative;
 	}
 	else
@@ -768,13 +768,13 @@ void TMC_move(TMC* self, float relative){
 		if (relative > 0)
 		{
 			TMC_setDirection(self, 1);
-			self->tim_ptr->steps[self->tim_channel] += relative * self->stepDivision;
+			self->tim_ptr->steps[self->tim_channel] += relative * self->stepDivision * 2;
 			self->current_pos += relative;
 		}
 		else
 		{
 			TMC_setDirection(self, -1);
-			self->tim_ptr->steps[self->tim_channel] += (-relative) * self->stepDivision;
+			self->tim_ptr->steps[self->tim_channel] += (-relative) * self->stepDivision * 2;
 			self->current_pos += relative;
 		}
 	}

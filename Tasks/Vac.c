@@ -3,6 +3,7 @@
 #include "cmsis_os.h"
 #include "Comm.h"
 #include "TMC2209.h"
+#include "pressure.h"
 
 #define VAC_CW_DIRECTION +1
 #define VAC_PRESSURE_DIRECTION -1
@@ -10,6 +11,7 @@
 extern osThreadId_t defaultTaskHandle;
 extern osMutexId_t MUart1MutexHandle;
 extern osMutexId_t MTim8MutexHandle;
+extern I2C_HandleTypeDef hi2c1;
 
 void StartVacTask(void* arg) {
 	
@@ -50,32 +52,37 @@ void StartVacTask(void* arg) {
 					__NOP;
 			}
 		}
+		Pressure_Read(&hi2c1);
 		if (vac_working)
 		{
-			if (target_pressure - globalInfo.vac_pressure > 100)
+			if (target_pressure - globalInfo.vac_pressure > 200)
 			{
 				// VAC conflict with Motor Z1 and Motor Z2
+				if (vac_working == -1) TMC_reset(TMC_VAC);
 				TMC_wait_motor_stop(TMC_MZ1);
 				TMC_wait_motor_stop(TMC_MZ2);
-				TMC_wait_motor_stop(TMC_VAC);
 				osMutexAcquire(MTim8MutexHandle, osWaitForever);
-				TMC_setSpeed(TMC_VAC, 200);
+				TMC_setSpeed(TMC_VAC, 20);
 				osMutexAcquire(MUart1MutexHandle, osWaitForever);
-				TMC_move(TMC_VAC, 4 * VAC_PRESSURE_DIRECTION);
+				TMC_move(TMC_VAC, 0xFFFF * VAC_PRESSURE_DIRECTION);
+				vac_working = 1;
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
-			} else if (globalInfo.vac_pressure - target_pressure > 100)
+			} else if (globalInfo.vac_pressure - target_pressure > 200)
 			{
 				// VAC conflict with Motor Z1 and Motor Z2
+				if (vac_working == 1) TMC_reset(TMC_VAC);
 				TMC_wait_motor_stop(TMC_MZ1);
 				TMC_wait_motor_stop(TMC_MZ2);
-				TMC_wait_motor_stop(TMC_VAC);
 				osMutexAcquire(MTim8MutexHandle, osWaitForever);
-				TMC_setSpeed(TMC_VAC, 200);
+				TMC_setSpeed(TMC_VAC, 20);
 				osMutexAcquire(MUart1MutexHandle, osWaitForever);
-				TMC_move(TMC_VAC,-4 * VAC_PRESSURE_DIRECTION);
+				TMC_move(TMC_VAC,-0xFFFF * VAC_PRESSURE_DIRECTION);
+				vac_working = -1;
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
+			} else if (vac_working*(globalInfo.vac_pressure - target_pressure) > 0){
+				TMC_reset(TMC_VAC);
 			}
 		}
 	}

@@ -3,13 +3,11 @@
 #include "cmsis_os.h"
 #include "Comm.h"
 #include "TMC2209.h"
-#include "pressure.h"
 #include "Jetting.h"
 #include "arm_math.h"
 
 extern osThreadId_t jettingTaskHandle;
 extern ADC_HandleTypeDef hadc1;
-extern I2C_HandleTypeDef hi2c1;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim9;
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -37,6 +35,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				if (triggerHandler.MX)
 				{
 					TMC_reset(triggerHandler.MX);
+					__HAL_TIM_SET_COUNTER(&htim3, 0);
 				}
 				last_trigger_time_mx  = HAL_GetTick();
 			}
@@ -102,7 +101,6 @@ void StartSensorTask(void *argument) {
 	
 	while(1) {
 		HAL_ADC_Start_IT(&hadc1);
-		Pressure_Read(&hi2c1);
 		globalInfo.trigger_state.bits.MX  =  HAL_GPIO_ReadPin(MX_TRIG_GPIO_Port , MX_TRIG_Pin );
 		globalInfo.trigger_state.bits.MZ1 =  HAL_GPIO_ReadPin(MZ1_TRIG_GPIO_Port, MZ1_TRIG_Pin);
 		globalInfo.trigger_state.bits.MZ2 =  HAL_GPIO_ReadPin(MZ2_TRIG_GPIO_Port, MZ2_TRIG_Pin);
@@ -111,7 +109,7 @@ void StartSensorTask(void *argument) {
 		globalInfo.trigger_state.bits.SW1 = !HAL_GPIO_ReadPin(SW1_GPIO_Port,      SW1_Pin     );
 		globalInfo.trigger_state.bits.SW2 = !HAL_GPIO_ReadPin(SW2_GPIO_Port,      SW2_Pin     );
 		globalInfo.trigger_state.bits.SW3 = !HAL_GPIO_ReadPin(SW3_GPIO_Port,      SW3_Pin     );
-		globalInfo.x_encoder_pos = htim3.Instance->CNT;
+		globalInfo.x_encoder_pos = (int16_t)htim3.Instance->CNT * 0.003329f;
 		
 		if (globalInfo.temperature > -100 && globalInfo.temperature < 1000) {
 			int32_t error = globalInfo.targetTemperature - globalInfo.temperature;
