@@ -60,7 +60,7 @@ void MX_GPIO_Init(void)
                           |LEDB_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, EN37V_Pin|MOTOR_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, VAC1_CTL_Pin|MS1_CTL_Pin|VAC2_CTL_Pin|MS2_CTL_Pin
@@ -92,12 +92,18 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : EN37V_Pin */
-  GPIO_InitStruct.Pin = EN37V_Pin;
+  /*Configure GPIO pins : USB_DET1_Pin USB_DET2_Pin */
+  GPIO_InitStruct.Pin = USB_DET1_Pin|USB_DET2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : EN37V_Pin MOTOR_EN_Pin */
+  GPIO_InitStruct.Pin = EN37V_Pin|MOTOR_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(EN37V_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : N_CRC_FAIL_Pin */
   GPIO_InitStruct.Pin = N_CRC_FAIL_Pin;

@@ -212,14 +212,6 @@ void StartDefaultTask(void *argument)
 	triggerHandler.MX  = TMC_MX;
 	triggerHandler.MZ1 = TMC_MZ1;
 	triggerHandler.MZ2 = TMC_MZ2;
-	TMC_init(TMC_MX , MRES_16);
-	TMC_init(TMC_MZ1, MRES_16);
-	TMC_init(TMC_MZ2, MRES_16);
-	TMC_init(TMC_VAC, MRES_16);
-	TMC_init(TMC_MS1, MRES_16);
-	TMC_init(TMC_MS2, MRES_16);
-	TMC_init(TMC_FY , MRES_16);
-	TMC_init(TMC_QJ , MRES_16);
 	GlobalInit();
   /* Infinite loop */
   for(;;)

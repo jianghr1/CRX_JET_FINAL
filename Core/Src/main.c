@@ -114,6 +114,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM9_Init();
   MX_FATFS_Init();
+  MX_UART8_Init();
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start_IT(&htim1);
 	HAL_TIM_Base_Start_IT(&htim4);

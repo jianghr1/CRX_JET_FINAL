@@ -94,6 +94,8 @@ void EmergencyStop(GlobalState_t issue) {
 	HAL_GPIO_WritePin(UVF_CTL_GPIO_Port , UVF_CTL_Pin , GPIO_PIN_RESET);
 	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
 	// Heater
+	HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_RESET);
 	HAL_TIM_PWM_Stop(&htim9, TIM_CHANNEL_1);
 	// Motors
 	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
@@ -109,18 +111,45 @@ void EmergencyStop(GlobalState_t issue) {
 
 void GlobalInit() {
 	// Motors
+	htim1.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	htim8.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
+	htim8.Instance->CCR2 = 0;
 	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+	htim8.Instance->CCR4 = 0;
 	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
 	// Pumps
+	htim4.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+	htim4.Instance->CCR2 = 0;
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+	htim4.Instance->CCR3 = 0;
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+	htim4.Instance->CCR4 = 0;
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
-
+	// Power
+	osDelay(100);
+	HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
+	// Heat
+	htim2.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	// Light
+	htim9.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
+	//TMC Init
+	osDelay(100);
+	TMC_init(TMC_MX , MRES_16);
+	TMC_init(TMC_MZ1, MRES_16);
+	TMC_init(TMC_MZ2, MRES_16);
+	TMC_init(TMC_VAC, MRES_16);
+	TMC_init(TMC_MS1, MRES_16);
+	TMC_init(TMC_MS2, MRES_16);
+	TMC_init(TMC_FY , MRES_16);
+	TMC_init(TMC_QJ , MRES_16);
+	// 37V
+	osDelay(100);
+	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_SET);
 }
 
 typedef enum {

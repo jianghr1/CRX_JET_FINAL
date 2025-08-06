@@ -89,6 +89,8 @@ void Error_Handler(void);
 #define MS2_YW_Pin GPIO_PIN_5
 #define MS2_YW_GPIO_Port GPIOC
 #define MS2_YW_EXTI_IRQn EXTI9_5_IRQn
+#define USB_DET1_Pin GPIO_PIN_0
+#define USB_DET1_GPIO_Port GPIOB
 #define EN37V_Pin GPIO_PIN_1
 #define EN37V_GPIO_Port GPIOB
 #define N_CRC_FAIL_Pin GPIO_PIN_9
@@ -103,6 +105,8 @@ void Error_Handler(void);
 #define SW2_GPIO_Port GPIOE
 #define SW1_Pin GPIO_PIN_15
 #define SW1_GPIO_Port GPIOE
+#define USB_DET2_Pin GPIO_PIN_12
+#define USB_DET2_GPIO_Port GPIOB
 #define MFY_Pin GPIO_PIN_12
 #define MFY_GPIO_Port GPIOD
 #define MQJ_Pin GPIO_PIN_13
@@ -139,6 +143,8 @@ void Error_Handler(void);
 #define UVF_CTL_GPIO_Port GPIOD
 #define UVL_CTL_Pin GPIO_PIN_3
 #define UVL_CTL_GPIO_Port GPIOB
+#define MOTOR_EN_Pin GPIO_PIN_8
+#define MOTOR_EN_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
