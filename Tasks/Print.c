@@ -65,7 +65,9 @@ void decodeFloat(float* out) {
 	while (idx < bytesRead) {
 		if (rx[idx] > '0' && rx[idx] < '9') {
 			*out = *out * 10 + (rx[idx] - '0');
+			++idx;
 		} else if (rx[idx] == '.') {
+			++idx;
 			break;
 		} else {
 			return;
@@ -75,6 +77,7 @@ void decodeFloat(float* out) {
 		if (rx[idx] > '0' && rx[idx] < '9') {
 			*out = *out + (rx[idx] & 0xF) * mul;
 			mul *= 0.1f;
+			++idx;
 		} else {
 			return;
 		}
@@ -82,16 +85,23 @@ void decodeFloat(float* out) {
 }
 
 void readLine(void) {
-	uint8_t* CHA_R = MS1_CH1_List;
-	uint8_t* CHB_R = MS1_CH2_List[x%16];
-	uint8_t* CHC_R = MS2_CH1_List[x%64];
-	uint8_t* CHD_R = MS2_CH2_List[x%64];
+	uint8_t* MS1_CH1 = MS1_CH1_List;
+	uint8_t* MS1_CH2 = MS1_CH2_List[x%16];
+	uint8_t* MS2_CH1 = MS2_CH1_List[x%64];
+	uint8_t* MS2_CH2 = MS2_CH2_List[x%64];
 
-	CHA_R[0] = 0xA8; ++CHA_R;
-	CHB_R[0] = 0xA9; ++CHB_R;
-	CHC_R[0] = 0xAA; ++CHC_R;
-	CHD_R[0] = 0xAB; ++CHD_R;
+	MS2_CH2[0] = 0xA8; ++MS2_CH2;
+	MS2_CH1[0] = 0xA9; ++MS2_CH1;
+	MS1_CH2[0] = 0xAA; ++MS1_CH2;
+	MS1_CH1[0] = 0xAB; ++MS1_CH1;
 	
+	for (y = 0; y < 40; y++) {
+		MS1_CH1[y] = 0;
+		MS1_CH2[y] = 0;
+		MS2_CH1[y] = 0;
+		MS2_CH2[y] = 0;
+	}
+
 	for (y = 0; y < size_y/2; y++) {
 		if (idx == bytesRead)
 		{
@@ -106,38 +116,19 @@ void readLine(void) {
 		}
 		if ((rx[idx] >> 4) == 0) {
 			// MS1
-			CHA_R[y/8] |= 1<<(7-(y%8));
-			CHC_R[y/8] &= ~(1<<(7-(y%8)));
+			MS2_CH1[y/8] |= 1<<(7-(y%8));
 		} else {
 			// MS2
-			CHC_R[y/4] |= 1<<(7-(y%8));
-			CHA_R[y/8] &= ~(1<<(7-(y%8)));
+			MS1_CH1[y/4] |= 1<<(7-(y%8));
 		}
 		
 		if ((rx[idx] & 0xF) == 0) {
 			// MS1
-			CHB_R[y/8] |= 1<<(7-(y%8));
-			CHD_R[y/8] &= ~(1<<(7-(y%8)));
+			MS2_CH2[y/8] |= 1<<(7-(y%8));
 		} else {
 			// MS2
-			CHD_R[y/8] |= 1<<(7-(y%8));
-			CHB_R[y/8] &= ~(1<<(7-(y%8)));
+			MS1_CH2[y/8] |= 1<<(7-(y%8));
 		}
-	}
-	if (y % 8 != 0)
-	{
-		CHA_R[y/8] &= 0xFF << (8-(y%8));
-		CHB_R[y/8] &= 0xFF << (8-(y%8));
-		CHC_R[y/8] &= 0xFF << (8-(y%8));
-		CHD_R[y/8] &= 0xFF << (8-(y%8));
-		y += 8 - (y%8);
-	}
-	for (; y < 320; y+=8)
-	{
-		CHA_R[y/8] = 0;
-		CHB_R[y/8] = 0;
-		CHC_R[y/8] = 0;
-		CHD_R[y/8] = 0;
 	}
 }
 
