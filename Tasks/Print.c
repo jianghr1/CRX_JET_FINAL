@@ -5,6 +5,7 @@
 #include "Comm.h"
 #include "Jetting.h"
 #include "Init.h"
+#include "math.h"
 
 extern osThreadId_t motorTaskHandle;
 extern osThreadId_t pumpTaskHandle;
@@ -14,6 +15,9 @@ extern osThreadId_t jettingTaskHandle;
 
 #define CHECK_STATE if ((currentState & 0xF) == GlobalStateEStop || (currentState & 0xF) == GlobalStateError) return
 
+#define AD_gap 12.3613
+#define AC_gap 11.811
+#define AB_gap 0.5503
 
 uint8_t rx[BLOCKSIZE];
 
@@ -208,25 +212,93 @@ void PrintTask(void) {
 			
 		}
 
-		for (x = 0; x < size_x; x++) {
-			readLine();
+		for (x = 0; x < size_x + AD_gap/stepsize_x; x++) {
+			float posA = x;
+			float posB = x - AB_gap / stepsize_x;
+			float posC = x - AC_gap / stepsize_x;
+			float posD = x - AD_gap / stepsize_x;
+			
+			if (x < size_x) {
+				readLine();
+			}
 			CHECK_STATE;
 			// currently, We only Consider Channel A
-			jettingInfo.data = (Jetting_t *)MS1_CH1_List;
-			// jettingInfo.threadId = TBD
-			osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
-			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-			CHECK_STATE;
 			
-			// Move To Next Position
-			command.code = G110;
-			command.param1 = 1;
-			command.param2 = 30;
-			command.param3 = stepsize_x;
-			currentIntCommandPtr = &command;
-			osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
-			osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
-			CHECK_STATE;
+			while ((int)posA < (x + 1)) {
+				// Calculate next integer positions for each channel
+				int32_t nextA = ceilf(posA);
+				int32_t nextB = ceilf(posB);
+				int32_t nextC = ceilf(posC);
+				int32_t nextD = ceilf(posD);
+
+				// Find minimum delta to next integer position
+				float deltaA = (nextA >= 0) ? (nextA - posA) : 1;
+				float deltaB = (nextB >= 0) ? (nextB - posB) : 1;
+				float deltaC = (nextC >= 0) ? (nextC - posC) : 1;
+				float deltaD = (nextD >= 0) ? (nextD - posD) : 1;
+
+				float minDelta = deltaA;
+				int channel = 0; // 0:A, 1:B, 2:C, 3:D
+				if (deltaB < minDelta) { minDelta = deltaB; channel = 1; }
+				if (deltaC < minDelta) { minDelta = deltaC; channel = 2; }
+				if (deltaD < minDelta) { minDelta = deltaD; channel = 3; }
+
+				// Move all channels by minDelta
+				posA += minDelta;
+				posB += minDelta;
+				posC += minDelta;
+				posD += minDelta;
+
+				// jetting
+				switch (channel) {
+					case 0:
+						if (nextA >= 0 && nextA < size_x) {
+							jettingInfo.data = (Jetting_t *)MS1_CH1_List;
+							// jettingInfo.threadId = TBD
+							osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
+							osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+							CHECK_STATE;
+						}	
+						break;
+					case 1:
+						if (nextB >= 0 && nextB < size_x) {
+							jettingInfo.data = (Jetting_t *)(MS1_CH2_List[nextB]);
+							// jettingInfo.threadId = TBD
+							osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
+							osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+							CHECK_STATE;
+						}
+						break;
+					case 2:
+						if (nextC >= 0 && nextC < size_x) {
+							jettingInfo.data = (Jetting_t *)(MS2_CH1_List[nextC]);
+							// jettingInfo.threadId = TBD
+							osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
+							osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+							CHECK_STATE;
+						}
+						break;
+					case 3:
+						if (nextD >= 0 && nextD < size_x) {
+							jettingInfo.data = (Jetting_t *)(MS2_CH2_List[nextD]);
+							// jettingInfo.threadId = TBD
+							osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
+							osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+							CHECK_STATE;
+						}
+						break;
+				}
+
+				// Move To Next Position
+				command.code = G110;
+				command.param1 = 1;
+				command.param2 = 30;
+				command.param3 = minDelta * stepsize_x;
+				currentIntCommandPtr = &command;
+				osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
+				osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+				CHECK_STATE;
+			}			
 		}
 	}
 	f_res = f_close(&myFile);
