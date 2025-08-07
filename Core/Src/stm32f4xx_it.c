@@ -23,7 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "TMC2209.h"
-
+#include "cmsis_os.h"
+#include "Print.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,6 +72,7 @@ extern DMA_HandleTypeDef hdma_uart8_tx;
 extern UART_HandleTypeDef huart7;
 extern UART_HandleTypeDef huart8;
 extern TIM_HandleTypeDef htim7;
+extern osThreadId_t defaultTaskHandle;
 
 /* USER CODE BEGIN EV */
 
@@ -307,12 +309,44 @@ void EXTI9_5_IRQHandler(void)
 void TIM1_UP_TIM10_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 0 */
-	if (tmc_timers[TMC_TIMER1].steps[0]) {
-		htim1.Instance->CCR1 = 100;
-		--tmc_timers[TMC_TIMER1].steps[0];
-	} else {
-		htim1.Instance->CCR1 = 0;
+	if (rcr_overwrite)
+	{
+		osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+		if (tmc_timers[TMC_TIMER1].steps[0] > 0)
+		{
+			tmc_timers[TMC_TIMER1].steps[0] -= tmc_timers[TMC_TIMER1].HARR;
+		}
+		if (tmc_timers[TMC_TIMER1].steps[0] > 0) {
+			htim1.Instance->CCR1 = 100;
+			htim1.Instance->RCR = rcr_overwrite - 1;
+			tmc_timers[TMC_TIMER1].HARR = rcr_overwrite;
+		} else {
+			htim1.Instance->CCR1 = 0;
+			tmc_timers[TMC_TIMER1].HARR = 0;
+			tmc_timers[TMC_TIMER1].steps[0] = 0;
+		}
 	}
+	else {
+		if (tmc_timers[TMC_TIMER1].steps[0] > 0)
+		{
+			tmc_timers[TMC_TIMER1].steps[0] -= tmc_timers[TMC_TIMER1].HARR;
+		}
+		if (tmc_timers[TMC_TIMER1].steps[0] > 0) {
+			htim1.Instance->CCR1 = 100;
+			if (tmc_timers[TMC_TIMER1].steps[0] <= 255)
+			{
+				htim1.Instance->RCR = tmc_timers[TMC_TIMER1].steps[0] - 1;
+			} else {
+				htim1.Instance->RCR = 255;
+			}
+			tmc_timers[TMC_TIMER1].HARR = htim1.Instance->RCR + 1;
+		} else {
+			htim1.Instance->CCR1 = 0;
+			tmc_timers[TMC_TIMER1].HARR = 0;
+			tmc_timers[TMC_TIMER1].steps[0] = 0;
+		}
+	}
+	
 	__HAL_TIM_CLEAR_IT(&htim1, TIM_IT_UPDATE);
 //	uint32_t step = (tmc_timers[TMC_TIMER1].steps[0] & 0x7F - 1) & 0x7F;
 //	htim1.Instance->RCR = step;

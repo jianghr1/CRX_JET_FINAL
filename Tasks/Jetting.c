@@ -76,7 +76,7 @@ void StartJettingTask(void *argument) {
 				retry--;
 				continue;
 			} else {
-				osThreadFlagsSet(jettingInfo.threadId, MAIN_TASK_CPLT);
+				osThreadFlagsSet(jettingInfo.threadId, JETTING_FPGA_REPLY);
 				break;
 			}
 		}

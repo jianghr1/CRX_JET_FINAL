@@ -212,10 +212,10 @@ void StartDefaultTask(void *argument)
 	triggerHandler.MX  = TMC_MX;
 	triggerHandler.MZ1 = TMC_MZ1;
 	triggerHandler.MZ2 = TMC_MZ2;
-	osDelay(1500);
+	osDelay(500);
 	GlobalInit();
 	HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDG_Pin, 0);
-	osDelay(1500);
+	osDelay(500);
 	InitTask();
 	HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDG_Pin, 1);
   /* Infinite loop */
@@ -303,7 +303,18 @@ void StartDefaultTask(void *argument)
 		 				usb_printf("ERROR");
 		 		}
 		 		osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
-		 	} else if (currentIntCommandPtr->code == M180) {
+		 	} else if (currentIntCommandPtr->code == M172) {
+        if (currentState == GlobalStateIdle) {
+          usb_printf("OK");
+          PrintTaskPrepare();
+          PrintTask();
+        } else if (currentState == GlobalStatePause) {
+          usb_printf("OK");
+          PrintTask();
+        } else {
+          usb_printf("ERROR");
+        }
+      } else if (currentIntCommandPtr->code == M180) {
 				ReadFileList();
 		 		osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 			}

@@ -114,7 +114,7 @@ void GlobalInit() {
 	// 37V
 	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_SET);
 	osDelay(500);
-	uint8_t VoltageR=150;
+	uint8_t VoltageR=170;
   HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 0);
 	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 0);
 	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 0);
@@ -154,7 +154,7 @@ void GlobalInit() {
 	HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
 	//TMC Init
 	osDelay(100);
-	TMC_init(TMC_MX , MRES_16);
+	TMC_init(TMC_MX , MRES_64);
 	TMC_init(TMC_MZ1, MRES_16);
 	TMC_init(TMC_MZ2, MRES_16);
 	TMC_init(TMC_VAC, MRES_16);

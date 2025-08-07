@@ -33,11 +33,11 @@ void StartHeaderTask(void *argument) {
 				jettingInfo.threadId = headerTaskHandle;
 				jetting.channel = currentIntCommandPtr->param1;
 				for (uint32_t i = 0; i < currentIntCommandPtr->param3; i++) {
-					uint32_t tick = HAL_GetTick() + 1000 / currentIntCommandPtr->param2;
+					uint32_t tick = xTaskGetTickCount() + 1000 / currentIntCommandPtr->param2;
 					jettingInfo.data = &jetting;
 					osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
-					osThreadFlagsWait(MAIN_TASK_CPLT, osFlagsWaitAny, osWaitForever);
-					if (HAL_GetTick() < tick)
+					osThreadFlagsWait(JETTING_FPGA_REPLY, osFlagsWaitAny, osWaitForever);
+					if (xTaskGetTickCount() < tick)
 					{
 						osDelayUntil(tick);
 					}

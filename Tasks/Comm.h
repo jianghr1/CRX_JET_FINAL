@@ -91,6 +91,7 @@ typedef struct {
 	int16_t targetTemperature;
 	int32_t target_pressure;
 	float x_encoder_pos;
+	float x_target_pos;
 	uint8_t motor_state;
 	TriggerState_t trigger_state;
 	char fpath[32];

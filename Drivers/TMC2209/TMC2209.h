@@ -358,7 +358,7 @@ typedef struct {
 	int32_t acceleration;
 	int32_t deceleration;
 	uint16_t HARR;
-	uint32_t steps[4];
+	int32_t steps[4];
 } TMC_TIM;
 
 typedef struct TMC_t TMC;

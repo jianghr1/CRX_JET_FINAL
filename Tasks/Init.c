@@ -14,15 +14,6 @@ extern osThreadId_t headerTaskHandle;
 void InitTask(void) {
 	static GMCommand_t command;
 	
-	TMC_init(TMC_MX , MRES_16);
-	TMC_init(TMC_MZ1, MRES_16);
-	TMC_init(TMC_MZ2, MRES_16);
-	TMC_init(TMC_VAC, MRES_16);
-	TMC_init(TMC_MS1, MRES_16);
-	TMC_init(TMC_MS2, MRES_16);
-	TMC_init(TMC_QJ , MRES_16);
-	TMC_init(TMC_FY , MRES_16);
-	
 	// X zero
 	command.code = G114;
 	currentIntCommandPtr = &command;

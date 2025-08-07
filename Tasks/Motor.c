@@ -4,7 +4,7 @@
 #include "Comm.h"
 #include "TMC2209.h"
 
-#define MOTOR_X_MM_TO_ESTEP 5.305f
+#define MOTOR_X_MM_TO_ESTEP 2.6525f
 #define MOTOR_Z_MM_TO_ESTEP 50.0f // 4mm per round
 #define MOTOR_X_HOME_DIRECTION +1
 #define MOTOR_Z_HOME_DIRECTION +1
@@ -17,6 +17,7 @@
 extern osThreadId_t defaultTaskHandle;
 extern osMutexId_t MUart1MutexHandle;
 extern osMutexId_t MTim8MutexHandle;
+extern TIM_HandleTypeDef htim3;
 
 void StartMotorTask(void* arg) {
 	while(1)
@@ -27,12 +28,20 @@ void StartMotorTask(void* arg) {
 		switch(currentIntCommandPtr->code)
 		{
 			case G110: {
-				osMutexAcquire(MUart1MutexHandle, osWaitForever);
+				globalInfo.x_target_pos -= currentIntCommandPtr->param3 * MOTOR_X_MOVE_DIRECTION;
 				TMC_setSpeed(TMC_MX, MOTOR_X_MM_TO_ESTEP * currentIntCommandPtr->param2);
-				TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * currentIntCommandPtr->param3 * MOTOR_X_MOVE_DIRECTION);
+				osMutexAcquire(MUart1MutexHandle, osWaitForever);
+				TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * (globalInfo.x_encoder_pos - globalInfo.x_target_pos));
 				osMutexRelease(MUart1MutexHandle);
 				TMC_wait_motor_stop(TMC_MX);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+
+				// osMutexAcquire(MUart1MutexHandle, osWaitForever);
+				// TMC_setSpeed(TMC_MX, MOTOR_X_MM_TO_ESTEP * currentIntCommandPtr->param2);
+				// TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * currentIntCommandPtr->param3 * MOTOR_X_MOVE_DIRECTION);
+				// osMutexRelease(MUart1MutexHandle);
+				// TMC_wait_motor_stop(TMC_MX);
+				// osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case G111: {
@@ -95,12 +104,19 @@ void StartMotorTask(void* arg) {
 				TMC_setSpeed(TMC_MX, 0.5 * MOTOR_X_MM_TO_ESTEP);
 				TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * 800 * MOTOR_X_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MX);
+				osDelay(200);
+				__HAL_TIM_SET_COUNTER(&htim3, 0);
+				osDelay(200);
 				CHECK_STATE;
 				triggerHandler.MX = 0;
 				TMC_setSpeed(TMC_MX, 5 * MOTOR_X_MM_TO_ESTEP);
 				TMC_moveTo(TMC_MX, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_X_HOME_DIRECTION);
 				triggerHandler.MX = TMC_MX;
 				osMutexRelease(MUart1MutexHandle);
+				osDelay(200);
+				globalInfo.x_target_pos = 0;
+				__HAL_TIM_SET_COUNTER(&htim3, 0);
+				osDelay(200);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
@@ -134,8 +150,8 @@ void StartMotorTask(void* arg) {
 				CHECK_STATE;
 				triggerHandler.MZ1 = 0;
 				triggerHandler.MZ2 = 0;
-				TMC_move(TMC_MZ1, - 2 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
-				TMC_move(TMC_MZ2, - 2 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+				TMC_move(TMC_MZ1, - 2 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+				TMC_move(TMC_MZ2, - 2 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
 				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
@@ -152,8 +168,8 @@ void StartMotorTask(void* arg) {
 				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
 				CHECK_STATE;
-				TMC_move(TMC_MZ1, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
-				TMC_move(TMC_MZ2, - 10 * MOTOR_X_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+				TMC_move(TMC_MZ1, - 1 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+				TMC_move(TMC_MZ2, - 1 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
 				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
