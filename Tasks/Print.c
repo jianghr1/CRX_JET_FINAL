@@ -102,7 +102,7 @@ void readLine(void) {
 		MS2_CH2[y] = 0;
 	}
 
-	for (y = 0; y < size_y/2; y++) {
+	for (y = 0; y < size_y/2; y++, idx++) {
 		if (idx == bytesRead)
 		{
 			f_res = f_read(&myFile, rx, sizeof(rx), &bytesRead);
@@ -119,7 +119,7 @@ void readLine(void) {
 			MS2_CH1[y/8] |= 1<<(7-(y%8));
 		} else {
 			// MS2
-			MS1_CH1[y/4] |= 1<<(7-(y%8));
+			MS1_CH1[y/8] |= 1<<(7-(y%8));
 		}
 		
 		if ((rx[idx] & 0xF) == 0) {
