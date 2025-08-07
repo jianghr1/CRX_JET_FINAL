@@ -20,6 +20,8 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim8;
 extern TIM_HandleTypeDef htim9;
+extern SPI_HandleTypeDef hspi1;
+extern SPI_HandleTypeDef hspi4;
 extern osThreadId_t defaultTaskHandle;
 extern osThreadId_t motorTaskHandle;
 extern osThreadId_t pumpTaskHandle;
@@ -95,7 +97,6 @@ void EmergencyStop(GlobalState_t issue) {
 	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
 	// Heater
 	HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_RESET);
 	HAL_TIM_PWM_Stop(&htim9, TIM_CHANNEL_1);
 	// Motors
 	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
@@ -110,6 +111,20 @@ void EmergencyStop(GlobalState_t issue) {
 }
 
 void GlobalInit() {
+	// 37V
+	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_SET);
+	osDelay(500);
+	uint8_t VoltageR=150;
+  HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 0);
+	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 0);
+	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 0);
+	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 0);
+	HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
+	HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
+	HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 1);
+	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 1);
+	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 1);
+	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 1);
 	// Motors
 	htim1.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -129,7 +144,7 @@ void GlobalInit() {
 	htim4.Instance->CCR4 = 0;
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
 	// Power
-	osDelay(100);
+	osDelay(1500);
 	HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
 	// Heat
 	htim2.Instance->CCR1 = 0;
@@ -147,9 +162,6 @@ void GlobalInit() {
 	TMC_init(TMC_MS2, MRES_16);
 	TMC_init(TMC_FY , MRES_16);
 	TMC_init(TMC_QJ , MRES_16);
-	// 37V
-	osDelay(100);
-	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_SET);
 }
 
 typedef enum {

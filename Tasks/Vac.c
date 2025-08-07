@@ -15,7 +15,6 @@ extern I2C_HandleTypeDef hi2c1;
 
 void StartVacTask(void* arg) {
 	
-	static int32_t target_pressure = 0;
 	static int32_t vac_working = 0;
 	uint32_t flag;
 	while(1)
@@ -39,7 +38,7 @@ void StartVacTask(void* arg) {
 					break;
 				}
 				case M105: {
-					target_pressure = currentIntCommandPtr->param1;
+					globalInfo.target_pressure = currentIntCommandPtr->param1;
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
@@ -55,33 +54,46 @@ void StartVacTask(void* arg) {
 		Pressure_Read(&hi2c1);
 		if (vac_working)
 		{
-			if (target_pressure - globalInfo.vac_pressure > 200)
+			if (globalInfo.target_pressure - globalInfo.vac_pressure > 200)
 			{
 				// VAC conflict with Motor Z1 and Motor Z2
 				if (vac_working == -1) TMC_reset(TMC_VAC);
 				TMC_wait_motor_stop(TMC_MZ1);
 				TMC_wait_motor_stop(TMC_MZ2);
 				osMutexAcquire(MTim8MutexHandle, osWaitForever);
-				TMC_setSpeed(TMC_VAC, 20);
+				TMC_setSpeed(TMC_VAC, 60);
 				osMutexAcquire(MUart1MutexHandle, osWaitForever);
 				TMC_move(TMC_VAC, 0xFFFF * VAC_PRESSURE_DIRECTION);
 				vac_working = 1;
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
-			} else if (globalInfo.vac_pressure - target_pressure > 200)
+			} else if (globalInfo.vac_pressure - globalInfo.target_pressure > 2000)
 			{
 				// VAC conflict with Motor Z1 and Motor Z2
 				if (vac_working == 1) TMC_reset(TMC_VAC);
 				TMC_wait_motor_stop(TMC_MZ1);
 				TMC_wait_motor_stop(TMC_MZ2);
 				osMutexAcquire(MTim8MutexHandle, osWaitForever);
-				TMC_setSpeed(TMC_VAC, 20);
+				TMC_setSpeed(TMC_VAC, 360);
 				osMutexAcquire(MUart1MutexHandle, osWaitForever);
 				TMC_move(TMC_VAC,-0xFFFF * VAC_PRESSURE_DIRECTION);
 				vac_working = -1;
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
-			} else if (vac_working*(globalInfo.vac_pressure - target_pressure) > 0){
+			} else if (globalInfo.vac_pressure - globalInfo.target_pressure > 200)
+			{
+				// VAC conflict with Motor Z1 and Motor Z2
+				if (vac_working == 1) TMC_reset(TMC_VAC);
+				TMC_wait_motor_stop(TMC_MZ1);
+				TMC_wait_motor_stop(TMC_MZ2);
+				osMutexAcquire(MTim8MutexHandle, osWaitForever);
+				TMC_setSpeed(TMC_VAC, 60);
+				osMutexAcquire(MUart1MutexHandle, osWaitForever);
+				TMC_move(TMC_VAC,-0xFFFF * VAC_PRESSURE_DIRECTION);
+				vac_working = -1;
+				osMutexRelease(MUart1MutexHandle);
+				osMutexRelease(MTim8MutexHandle);
+			} else if (vac_working*(globalInfo.vac_pressure - globalInfo.target_pressure) > 0){
 				TMC_reset(TMC_VAC);
 			}
 		}

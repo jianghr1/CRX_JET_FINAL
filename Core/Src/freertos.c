@@ -212,7 +212,12 @@ void StartDefaultTask(void *argument)
 	triggerHandler.MX  = TMC_MX;
 	triggerHandler.MZ1 = TMC_MZ1;
 	triggerHandler.MZ2 = TMC_MZ2;
+	osDelay(1500);
 	GlobalInit();
+	HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDG_Pin, 0);
+	osDelay(1500);
+	InitTask();
+	HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDG_Pin, 1);
   /* Infinite loop */
   for(;;)
   {
@@ -220,13 +225,19 @@ void StartDefaultTask(void *argument)
     flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, 20);
 		// Emergemcy Stop Handling
 		if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
+			HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDR_Pin, 0);
 			continue;
 		} else {
+			HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDR_Pin, 1);
 			currentIntCommandPtr = Comm_Fetch_Queue();
 			if (currentIntCommandPtr == 0)
 			{
+				HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDB_Pin, 0);
 				continue;
-      } else if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
+      } else {
+				HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDB_Pin, 1);
+			}
+			if (currentIntCommandPtr->code >= 0 && currentIntCommandPtr->code <= 3)
 		 	{
 		 		// Dispatch To Pump Thread
 		 		osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);

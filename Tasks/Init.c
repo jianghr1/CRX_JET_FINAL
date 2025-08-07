@@ -65,7 +65,7 @@ void InitTask(void) {
 	CHECK_STATE;
 	// VAC Set Target
 	command.code = M105;
-	command.param1 = -5000;
+	command.param1 = -800;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
@@ -77,7 +77,7 @@ void InitTask(void) {
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
-	while(globalInfo.vac_pressure > -4500) {
+	while(globalInfo.vac_pressure > -500) {
 		osDelay(500);
 		CHECK_STATE;
 	}
@@ -85,7 +85,7 @@ void InitTask(void) {
 	command.code = M100;
 	command.param1 = 0;
 	command.param2 = 180;
-	command.param3 = 1800;
+	command.param3 = 720;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
@@ -112,7 +112,7 @@ void InitTask(void) {
 	command.code = M101;
 	command.param1 = 0;
 	command.param2 = 180;
-	command.param3 = 1800;
+	command.param3 = 720;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
@@ -135,4 +135,5 @@ void InitTask(void) {
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
+	currentState = GlobalStateIdle;
 }

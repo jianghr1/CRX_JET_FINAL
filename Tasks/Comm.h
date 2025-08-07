@@ -89,6 +89,7 @@ typedef struct {
 	int32_t vac_pressure;
 	int16_t temperature;
 	int16_t targetTemperature;
+	int32_t target_pressure;
 	float x_encoder_pos;
 	uint8_t motor_state;
 	TriggerState_t trigger_state;
