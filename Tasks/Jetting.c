@@ -82,6 +82,7 @@ void StartJettingTask(void *argument) {
 		}
 		if (retry == 0) {
 			EmergencyStop(GlobalStateError);
+			usb_printf("[Error] JET Comm Fail");
 		}
 	}
 }

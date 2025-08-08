@@ -25,6 +25,7 @@
 #include "TMC2209.h"
 #include "cmsis_os.h"
 #include "Print.h"
+#include "Comm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -506,11 +507,19 @@ void UART7_IRQHandler(void)
 void UART8_IRQHandler(void)
 {
   /* USER CODE BEGIN UART8_IRQn 0 */
-
+	extern uint8_t decode_buffer[256];
   /* USER CODE END UART8_IRQn 0 */
   HAL_UART_IRQHandler(&huart8);
   /* USER CODE BEGIN UART8_IRQn 1 */
-
+	if (RESET != __HAL_UART_GET_FLAG(&huart8, UART_FLAG_IDLE))
+	{
+		__HAL_UART_CLEAR_IDLEFLAG(&huart8);
+		HAL_UART_DMAStop(&huart8);
+		uint32_t data_length = 256 - __HAL_DMA_GET_COUNTER(&hdma_uart8_rx);
+		HAL_UART_Transmit_DMA(&huart8, decode_buffer, data_length);
+		DecodeCDC(decode_buffer, data_length);
+		HAL_UART_Receive_DMA(&huart8, decode_buffer, 256);
+	}
   /* USER CODE END UART8_IRQn 1 */
 }
 

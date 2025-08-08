@@ -189,7 +189,9 @@ void PrintTaskPrepare(void) {
 	}
 
 	//Decode Header
+	usb_printf("Decoding Header");
 	decodeHeader();
+	usb_printf("Initing");
 	z = 0;
 	//Init EveryThing
 	InitTask();
@@ -201,28 +203,31 @@ void PrintTask(void) {
 	currentState = GlobalStatePrint;
 	static GMCommand_t command;
 	// Heater Set To 70 degree
+	usb_printf("Heating");
 	command.code = M120;
 	command.param1 = 70;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
-	TMC_setSpeed(TMC_MX, 2.6525f * stepsize_x * 120);
 	for (; z < size_z; z++) {
 		if (currentState == GlobalStatePause) {
 			return;
 		}
 		// Move To Next Position
+		usb_printf("Moving To Start");
+		globalInfo.x_target_pos = zeropos_x;
 		command.code = G110;
-		command.param1 = zeropos_x < globalInfo.x_encoder_pos;
-		command.param2 = 25;
-		command.param3 = fabsf(zeropos_x - globalInfo.x_encoder_pos);
+		command.param1 = 0;
+		command.param2 = 50;
+		command.param3 = 0;
 		currentIntCommandPtr = &command;
 		osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
 		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 		CHECK_STATE;
 		osDelay(500);
 		jettingInfo.threadId = defaultTaskHandle;
+		TMC_setSpeed(TMC_MX, 2.6525f * stepsize_x * 120);
 		float rcr_per_step = TMC_MX->stepDivision * 5.305f * stepsize_x;
 		int32_t rcr_total = 0;
 		rcr_overwrite = rcr_per_step;
@@ -312,9 +317,12 @@ void ReadFileList(void) {
 			usb_printf("Failed to ReadDir");
 			return;
 		}
-		if (fno.fname[0] == 0)
+		else if (fno.fname[0] == 0)
 		{
 			break;
+		}
+		else {
+			usb_printf("filename: %s", fno.fname);
 		}
 	}
 	f_res = f_closedir(&dir);

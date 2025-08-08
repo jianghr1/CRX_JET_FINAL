@@ -155,6 +155,7 @@ static uint8_t TMC_readRegister(TMC* self, uint8_t reg_addr){
 	static uint8_t datagram[DATAGRAM_READ_REQUEST_SIZE];
 	// In case of a communication error, the request will resent x times
 	uint8_t retry = 2;
+	uint8_t error = 0;
 	RETRY:
 	
 	// Sync byte
@@ -171,25 +172,30 @@ static uint8_t TMC_readRegister(TMC* self, uint8_t reg_addr){
 	
 	if (HAL_HalfDuplex_EnableTransmitter(self->huart) != HAL_OK)
 	{
+		error=1;
 		goto COMM_ERROR;
 	}
 	osDelay(1);
 	if (HAL_UART_Transmit(self->huart, datagram, DATAGRAM_READ_REQUEST_SIZE, timeout) != HAL_OK)
 	{
+		error=2;
 		goto COMM_ERROR;
 	}
 	
 	if (HAL_HalfDuplex_EnableReceiver(self->huart) != HAL_OK)
 	{
+		error=3;
 		goto COMM_ERROR;
 	}
 	
 	if (HAL_UART_Receive(self->huart, replyDatagram.bytes, DATAGRAM_READ_RESPONSE_SIZE, timeout) != HAL_OK)
 	{
+		error=4;
 		goto COMM_ERROR;
 	}
 	if(_swuart_calcCRC(replyDatagram.bytes, DATAGRAM_READ_RESPONSE_SIZE) != replyDatagram.reply.crc)
 	{
+		error=5;
 		goto COMM_ERROR;
 	}
 	
@@ -200,6 +206,7 @@ static uint8_t TMC_readRegister(TMC* self, uint8_t reg_addr){
 		if(retry--) goto RETRY;
 		self->comm_failure = true;
 		EmergencyStop(GlobalStateError);
+		usb_printf("TMC Comm FailRx: %d Error:%d", self-TMC_MX, error);
 		return 1;
 }
 
@@ -211,6 +218,7 @@ static uint8_t TMC_writeRegister(TMC* self, uint8_t reg_addr, uint32_t data){
 	// In case of a communication error, the request will resent x times
 	uint8_t retry = 2;
 	uint8_t write_counter_buf;
+	uint8_t error = 0;
 	
 	RETRY:
 		
@@ -241,21 +249,23 @@ static uint8_t TMC_writeRegister(TMC* self, uint8_t reg_addr, uint32_t data){
 	
 	if (HAL_HalfDuplex_EnableTransmitter(self->huart) != HAL_OK)
 	{
+		error=1;
 		goto COMM_ERROR;
 	}
 	
 	if (HAL_UART_Transmit(self->huart, datagram, DATAGRAM_WRITE_REQUEST_SIZE, timeout) != HAL_OK)
 	{
+		error=2;
 		goto COMM_ERROR;
 	}
 	
 	if (HAL_HalfDuplex_EnableReceiver(self->huart) != HAL_OK)
 	{
+		error=3;
 		goto COMM_ERROR;
 	}
 	
 	self->comm_failure = false;
-	
 	if(TMC_readRegister(self, TMC_REG_IFCNT)) goto COMM_ERROR;
 	
 	if(replyDatagram.reply.byte0 == write_counter_buf + 1){
@@ -268,6 +278,7 @@ static uint8_t TMC_writeRegister(TMC* self, uint8_t reg_addr, uint32_t data){
 		if(retry--) goto RETRY;
 		self->comm_failure = true;
 		EmergencyStop(GlobalStateError);
+		usb_printf("TMC Comm FailTx: %d Error:%d", self-TMC_MX, error);
 		return 1;
 }
 

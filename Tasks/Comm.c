@@ -15,6 +15,9 @@ GMCommand_t commIntQueue[COMM_QUEUE_SIZE];
 uint32_t commIntQueueHead;
 uint32_t commIntQueueTail;
 
+uint8_t print_buffer[256];
+uint8_t decode_buffer[256];
+
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim4;
@@ -22,6 +25,7 @@ extern TIM_HandleTypeDef htim8;
 extern TIM_HandleTypeDef htim9;
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi4;
+extern UART_HandleTypeDef huart8;
 extern osThreadId_t defaultTaskHandle;
 extern osThreadId_t motorTaskHandle;
 extern osThreadId_t pumpTaskHandle;
@@ -32,6 +36,8 @@ extern osThreadId_t jettingTaskHandle;
 void Comm_Init_Queue(void) {
 	commIntQueueHead = 0;
 	commIntQueueTail = 0;
+	__HAL_UART_ENABLE_IT(&huart8, UART_IT_IDLE);
+	HAL_UART_Receive_DMA(&huart8, decode_buffer, 256);
 }
 
 GMCommand_t* Comm_Fetch_Queue(void) {
@@ -57,22 +63,15 @@ void Comm_Put_Queue_CPLT(void) {
 }
 
 uint8_t usb_printf(const char *format, ...) {
-  extern USBD_HandleTypeDef hUsbDeviceHS;
-  extern uint8_t UserTxBufferHS[];
-  va_list args;
   uint32_t length;
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceHS.pClassData;
+	while(huart8.gState != HAL_UART_STATE_READY) {
+		osDelay(1);
+	}
+  va_list args;
   va_start(args, format);
-  length = vsnprintf((char *)UserTxBufferHS, APP_TX_DATA_SIZE, (char *)format, args);
+  length = vsnprintf((char *)print_buffer, APP_TX_DATA_SIZE, (char *)format, args);
   va_end(args);
-  uint32_t transmit_start_time = HAL_GetTick();
-  while (hcdc->TxState != 0) {
-    if (HAL_GetTick() - transmit_start_time > 10) {
-      return (USBD_FAIL);
-    }
-    osDelay(1);
-  }
-  return CDC_Transmit_HS(UserTxBufferHS, length);
+	HAL_UART_Transmit_DMA(&huart8, print_buffer, length);
 }
 
 void EmergencyStop(GlobalState_t issue) {
@@ -236,6 +235,8 @@ void DecodeCDC(uint8_t *data, uint32_t len) {
 					if (procCommand->code == M172) {
 						j = 0;
 						state = GMCode_FPATH;
+					} else if (procCommand->code == M171) {
+						state = GMCode_Jump;
 					} else {
 						DecodeNumParam(procCommand);
 						if (procCommand->numParams == 0) {
@@ -253,7 +254,7 @@ void DecodeCDC(uint8_t *data, uint32_t len) {
 			}
 			case GMCode_Param1: {
 				while (i < len && (data[i] < '0' || data[i] > '9')) ++i;
-				while (i < len && (data[i] > '0' && data[i] < '9')) {
+				while (i < len && (data[i] >= '0' && data[i] <= '9')) {
 					procCommand->param1 = procCommand->param1 * 10 + data[i] - '0';
 					++i;
 				}
@@ -272,7 +273,7 @@ void DecodeCDC(uint8_t *data, uint32_t len) {
 			}
 			case GMCode_Param2: {
 				while (i < len && (data[i] < '0' || data[i] > '9')) ++i;
-				while (i < len && (data[i] > '0' && data[i] < '9')) {
+				while (i < len && (data[i] >= '0' && data[i] <= '9')) {
 					procCommand->param2 = procCommand->param2 * 10 + data[i] - '0';
 					++i;
 				}
@@ -291,7 +292,7 @@ void DecodeCDC(uint8_t *data, uint32_t len) {
 			}
 			case GMCode_Param3: {
 				while (i < len && (data[i] < '0' || data[i] > '9')) ++i;
-				while (i < len && (data[i] > '0' && data[i] < '9')) {
+				while (i < len && (data[i] >= '0' && data[i] <= '9')) {
 					procCommand->param3 = procCommand->param3 * 10 + data[i] - '0';
 					++i;
 				}
