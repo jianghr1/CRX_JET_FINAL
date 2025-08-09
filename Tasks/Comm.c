@@ -110,20 +110,6 @@ void EmergencyStop(GlobalState_t issue) {
 }
 
 void GlobalInit() {
-	// 37V
-	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_SET);
-	osDelay(500);
-	uint8_t VoltageR=170;
-  HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 0);
-	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 0);
-	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 0);
-	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 0);
-	HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
-	HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
-	HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 1);
-	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 1);
-	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 1);
-	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 1);
 	// Motors
 	htim1.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -317,7 +303,15 @@ void DecodeCDC(uint8_t *data, uint32_t len) {
 				while (i < len && (data[i] < '0' || data[i] > '9')) ++i;
 				switch (data[i]) {
 					case '3': {
-						currentState |= GlobalStatePauseReq;
+						if (currentState == GlobalStatePrint) {
+							currentState |= GlobalStatePauseReq;
+							break;
+						}
+						else {
+							procCommand->param1 = data[i] - '0';
+							Comm_Put_Queue_CPLT();
+							break;
+						}
 					}
 					case '0': 
 					case '1': 
@@ -330,6 +324,8 @@ void DecodeCDC(uint8_t *data, uint32_t len) {
 					}
 					case '7': {
 						EmergencyStop(GlobalStateEStop);
+						procCommand->param1 = data[i] - '0';
+						Comm_Put_Queue_CPLT();
 						break;
 					}
 					case '4': {
@@ -340,6 +336,8 @@ void DecodeCDC(uint8_t *data, uint32_t len) {
 						break;
 					}
 				}
+				state = GMCode_GM;
+				break;
 			}
 		}
 		++i;

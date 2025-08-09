@@ -26,33 +26,47 @@ void StartHeaderTask(void *argument) {
 		{
 			case M120: {
 				if (currentIntCommandPtr->param1 < 0 || currentIntCommandPtr->param1 > 100) {
-					usb_printf("ERROR");
+					if (currentIntCommandPtr->commandSource)
+						usb_printf("ERROR\n");
+					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
-				usb_printf("OK");
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("OK\n");
 				globalInfo.targetTemperature = currentIntCommandPtr->param1 * 10;
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M121: {
 				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
+					if (currentIntCommandPtr->commandSource)
+						usb_printf("ERROR\n");
+					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				if (currentIntCommandPtr->param2 < 1 || currentIntCommandPtr->param2 > 300) {
-					usb_printf("ERROR");
+					if (currentIntCommandPtr->commandSource)
+						usb_printf("ERROR\n");
+					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				if (currentIntCommandPtr->param3 < 0 || currentIntCommandPtr->param3 > 10000 || currentIntCommandPtr->param3 != (int)currentIntCommandPtr->param3) {
-					usb_printf("ERROR");
+					if (currentIntCommandPtr->commandSource)
+						usb_printf("ERROR\n");
+					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
-				usb_printf("OK");
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("OK\n");
 				jettingInfo.threadId = headerTaskHandle;
-				jetting.channel = currentIntCommandPtr->param1;
+				uint32_t tick_start = xTaskGetTickCount();
 				for (uint32_t i = 0; i < currentIntCommandPtr->param3; i++) {
-					uint32_t tick = xTaskGetTickCount() + 1000 / currentIntCommandPtr->param2;
+					uint32_t tick = tick_start + 1000 * (i+1) / currentIntCommandPtr->param2;
+					jetting.channel = 2 - currentIntCommandPtr->param1 * 2;
 					jettingInfo.data = &jetting;
+					osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
+					osThreadFlagsWait(JETTING_FPGA_REPLY, osFlagsWaitAny, osWaitForever);
+					jetting.channel = jetting.channel + 1;
 					osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
 					osThreadFlagsWait(JETTING_FPGA_REPLY, osFlagsWaitAny, osWaitForever);
 					if (xTaskGetTickCount() < tick)
@@ -65,14 +79,19 @@ void StartHeaderTask(void *argument) {
 			}
 			case M122: {
 				if (currentIntCommandPtr->param1 < 0 || currentIntCommandPtr->param1 > 3) {
-					usb_printf("ERROR");
+					if (currentIntCommandPtr->commandSource)
+						usb_printf("ERROR\n");
+					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
 				if (currentIntCommandPtr->param2 < 17000 || currentIntCommandPtr->param2 > 19000) {
-					usb_printf("ERROR");
+					if (currentIntCommandPtr->commandSource)
+						usb_printf("ERROR\n");
+					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
-				usb_printf("OK");
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("OK\n");
 				VoltageR = currentIntCommandPtr->param2 * K + B;
 				switch (currentIntCommandPtr->param1)
 				{

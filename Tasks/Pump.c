@@ -16,24 +16,60 @@ void StartPumpTask(void *argument) {
 	{
 		// Wait Forever Until This Thread Task Notified
 		osThreadFlagsWait(ALL_NEW_TASK, osFlagsWaitAny, osWaitForever);
-		
+		if (currentIntCommandPtr->code >= M100 && currentIntCommandPtr->code <= M107) {
+			if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("ERROR\n");
+				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+				continue;
+			}
+			if (currentIntCommandPtr->param2 < 0 || currentIntCommandPtr->param2 > 720) {
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("ERROR\n");
+				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+				continue;
+			}
+			if (currentIntCommandPtr->param3 < 0 || currentIntCommandPtr->param3 > 3600) {
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("ERROR\n");
+				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+				continue;
+			}
+			if (currentIntCommandPtr->commandSource)
+				usb_printf("OK\n");
+		} else if (currentIntCommandPtr->code >= M130 && currentIntCommandPtr->code <= M133) {
+			if (currentIntCommandPtr->param1 & (-2)) {
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("ERROR\n");
+				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+				continue;
+			}
+			if (currentIntCommandPtr->commandSource)
+				usb_printf("OK\n");
+		}  else if (currentIntCommandPtr->code == M141) {
+			if (currentIntCommandPtr->param1 & (-2)) {
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("ERROR\n");
+				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+				continue;
+			}
+			if (currentIntCommandPtr->commandSource)
+				usb_printf("OK\n");
+		} else if (currentIntCommandPtr->code == M140) {
+			if (currentIntCommandPtr->param1 & (-8)) {
+				if (currentIntCommandPtr->commandSource)
+					usb_printf("ERROR\n");
+				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
+				continue;
+			}
+			if (currentIntCommandPtr->commandSource)
+				usb_printf("OK\n");
+		}
+
 		switch(currentIntCommandPtr->code) 
 		{
 			// MS rotate specific degree
 			case M100: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				if (currentIntCommandPtr->param2 < 0 || currentIntCommandPtr->param2 > 720) {
-					usb_printf("ERROR");
-					break;
-				}
-				if (currentIntCommandPtr->param3 < 0 || currentIntCommandPtr->param3 > 3600) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				TMC_setSpeed(TMC_MS1, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
 				TMC_move(TMC_MS1, PUMP_ROTATE_EDEG * currentIntCommandPtr->param3 * PUMP_CW_DIRECTION);
 				TMC_wait_motor_stop(TMC_MS1);
@@ -41,19 +77,6 @@ void StartPumpTask(void *argument) {
 				break;
 			}
 			case M101: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				if (currentIntCommandPtr->param2 < 0 || currentIntCommandPtr->param2 > 720) {
-					usb_printf("ERROR");
-					break;
-				}
-				if (currentIntCommandPtr->param3 < 0 || currentIntCommandPtr->param3 > 3600) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				TMC_setSpeed(TMC_MS2, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
 				TMC_move(TMC_MS2, PUMP_ROTATE_EDEG * currentIntCommandPtr->param3 * PUMP_CW_DIRECTION);
 				TMC_wait_motor_stop(TMC_MS2);
@@ -61,19 +84,6 @@ void StartPumpTask(void *argument) {
 				break;
 			}
 			case M102: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				if (currentIntCommandPtr->param2 < 0 || currentIntCommandPtr->param2 > 720) {
-					usb_printf("ERROR");
-					break;
-				}
-				if (currentIntCommandPtr->param3 < 0 || currentIntCommandPtr->param3 > 3600) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				TMC_setSpeed(TMC_QJ, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
 				TMC_move(TMC_QJ, PUMP_ROTATE_EDEG * currentIntCommandPtr->param3 * PUMP_CW_DIRECTION);
 				TMC_wait_motor_stop(TMC_QJ);
@@ -81,19 +91,6 @@ void StartPumpTask(void *argument) {
 				break;
 			}
 			case M103: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				if (currentIntCommandPtr->param2 < 0 || currentIntCommandPtr->param2 > 720) {
-					usb_printf("ERROR");
-					break;
-				}
-				if (currentIntCommandPtr->param3 < 0 || currentIntCommandPtr->param3 > 3600) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				TMC_setSpeed(TMC_FY, PUMP_ROTATE_EDEG * currentIntCommandPtr->param2);
 				TMC_move(TMC_FY, PUMP_ROTATE_EDEG * currentIntCommandPtr->param3 * PUMP_CW_DIRECTION);
 				TMC_wait_motor_stop(TMC_FY);
@@ -139,63 +136,33 @@ void StartPumpTask(void *argument) {
 			
 			// MS ctrl
 			case M130: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				HAL_GPIO_WritePin(MS1_CTL_GPIO_Port, MS1_CTL_Pin, currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M131: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				HAL_GPIO_WritePin(MS2_CTL_GPIO_Port, MS2_CTL_Pin, currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			// VAC ctrl
 			case M132: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				HAL_GPIO_WritePin(VAC1_CTL_GPIO_Port, VAC1_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M133: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				HAL_GPIO_WritePin(VAC2_CTL_GPIO_Port, VAC2_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			// UV ctrl
 			case M140: {
-				if (currentIntCommandPtr->param1 < 0 || currentIntCommandPtr->param1 > 8) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				htim2.Instance->CCR2 = currentIntCommandPtr->param1 * 125;
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M141: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
-					usb_printf("ERROR");
-					break;
-				}
-				usb_printf("OK");
 				HAL_GPIO_WritePin(UVF_CTL_GPIO_Port, UVF_CTL_Pin, (GPIO_PinState)currentIntCommandPtr->param1);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;

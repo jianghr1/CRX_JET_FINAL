@@ -14,19 +14,26 @@ extern osThreadId_t headerTaskHandle;
 void InitTask(void) {
 	static GMCommand_t command;
 	
+	osDelay(500);
+	GlobalInit();
+	HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDG_Pin, 0);
+	osDelay(500);
 	// X zero
+	usb_printf("[Init][Info] X Zeroing");
 	command.code = G114;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
 	// Z zero
+	usb_printf("[Init][Info] Z Zeroing");
 	command.code = G115;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
 	// MS1 Set To MS
+	usb_printf("[Init][Info] VAC Establishing");
 	command.code = M130;
 	command.param1 = 0;
 	currentIntCommandPtr = &command;
@@ -72,7 +79,9 @@ void InitTask(void) {
 		osDelay(500);
 		CHECK_STATE;
 	}
+	usb_printf("[Init][Info] VAC Ready");
 	// MS1 To Trigger
+	usb_printf("[Init][Info] MS1 Starting");
 	command.code = M100;
 	command.param1 = 0;
 	command.param2 = 180;
@@ -100,6 +109,7 @@ void InitTask(void) {
 	CHECK_STATE;
 	osDelay(500);
 	// MS2 To Trigger
+	usb_printf("[Init][Info] MS2 Starting");
 	command.code = M101;
 	command.param1 = 0;
 	command.param2 = 180;
@@ -126,5 +136,6 @@ void InitTask(void) {
 	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
+	usb_printf("[Init][Info] Init Complete");
 	currentState = GlobalStateIdle;
 }

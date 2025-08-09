@@ -121,7 +121,7 @@ void readLine(void) {
 		{
 			f_res = f_read(&myFile, rx, sizeof(rx), &bytesRead);
 			if (f_res != FR_OK) {
-				usb_printf("Failed to read file");
+				usb_printf("[Print][Error] Failed to read file");
 				EmergencyStop(GlobalStateError);
 				// Handle error
 				return;
@@ -169,30 +169,30 @@ void PrintTaskPrepare(void) {
 	currentState = GlobalStatePrint;
 	f_res = f_mount(&myFatFs, "0:", 1);
 	if (f_res != FR_OK) {
-		usb_printf("Failed to mount filesystem");
+		usb_printf("[Print][Error] Failed to mount filesystem\n");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
 	}
-	f_res = f_open(&myFile, "amout.txt", FA_OPEN_EXISTING | FA_READ);
+	f_res = f_open(&myFile, globalInfo.fpath, FA_OPEN_EXISTING | FA_READ);
 	if (f_res != FR_OK) {
-		usb_printf("Failed to open file");
+		usb_printf("[Print][Error] Failed to open file\n");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
 	}
 	f_res = f_read(&myFile, rx, sizeof(rx), &bytesRead);
 	if (f_res != FR_OK) {
-		usb_printf("Failed to read file");
+		usb_printf("[Print][Error] Failed to read file\n");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
 	}
 
 	//Decode Header
-	usb_printf("Decoding Header");
+	usb_printf("[Print][Info] Decoding Header\n");
 	decodeHeader();
-	usb_printf("Initing");
+	usb_printf("[Print][Info] Initing\n");
 	z = 0;
 	//Init EveryThing
 	InitTask();
@@ -204,7 +204,7 @@ void PrintTask(void) {
 	currentState = GlobalStatePrint;
 	static GMCommand_t command;
 	// Heater Set To 70 degree
-	usb_printf("Heating");
+	usb_printf("[Print][Info] Heating\n");
 	command.code = M120;
 	command.param1 = 70;
 	currentIntCommandPtr = &command;
@@ -212,11 +212,14 @@ void PrintTask(void) {
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
 	for (; z < size_z; z++) {
-		if (currentState == GlobalStatePause) {
+		if (currentState & GlobalStatePauseReq) {
+			usb_printf("[Print][Info] Reciev Pause Command!\n");
+			usb_printf("OK\n");
+			currentState = GlobalStatePause;
 			return;
 		}
 		// Move To Next Position
-		usb_printf("Moving To Start");
+		usb_printf("[Print][Info] Moving To Start\n");
 		globalInfo.x_target_pos = zeropos_x;
 		command.code = G110;
 		command.param1 = 0;
@@ -283,14 +286,14 @@ void PrintTask(void) {
 	
 	f_res = f_close(&myFile);
 	if (f_res != FR_OK) {
-		usb_printf("Failed to close file");
+		usb_printf("[Print][Error] Failed to close file\n");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
 	}
 	f_res = f_mount(NULL, "0:", 1);
 	if (f_res != FR_OK) {
-		usb_printf("Failed to unmount filesystem");
+		usb_printf("[Print][Error] Failed to unmount filesystem\n");
 		EmergencyStop(GlobalStateError);
 		// Handle error
 		return;
@@ -302,20 +305,30 @@ void PrintTask(void) {
 void ReadFileList(void) {
 	f_res = f_mount(&myFatFs, "0:", 1);
 	if (f_res != FR_OK) {
-		usb_printf("Failed to mount filesystem");
+		usb_printf("[Print][Error] Failed to mount filesystem\n");
 		// Handle error
 		return;
 	}
 	f_res = f_opendir(&dir, "");
 	if (f_res != FR_OK) {
-		usb_printf("Failed to openDir");
+		usb_printf("[Print][Error] Failed to openDir\n");
 		// Handle error
 		return;
 	}
+	f_res = f_readdir(&dir, &fno);
+	if (f_res != FR_OK) {
+		usb_printf("[Print][Error] Failed to ReadDir\n");
+		return;
+	}
+	if (fno.fname[0] == 0) {
+		usb_printf("[Print][Info] No files found\n");
+		return;
+	}
+	usb_printf("%s", fno.fname);
 	while(1) {
 		f_res = f_readdir(&dir, &fno);
 		if (f_res != FR_OK) {
-			usb_printf("Failed to ReadDir");
+			usb_printf("[Print][Error] Failed to ReadDir\n");
 			return;
 		}
 		else if (fno.fname[0] == 0)
@@ -323,19 +336,20 @@ void ReadFileList(void) {
 			break;
 		}
 		else {
-			usb_printf("filename: %s", fno.fname);
+			usb_printf(", %s", fno.fname);
 		}
 	}
+	usb_printf("\n");
 	f_res = f_closedir(&dir);
 	if (f_res != FR_OK) {
-		usb_printf("Failed to CloseDir");
+		usb_printf("[Print][Error] Failed to CloseDir\n");
 		// Handle error
 		return;
 	}
 	
 	f_res = f_mount(NULL, "0:", 1);
 	if (f_res != FR_OK) {
-		usb_printf("Failed to unmount filesystem");
+		usb_printf("[Print][Error] Failed to unmount filesystem\n");
 		// Handle error
 		return;
 	}
