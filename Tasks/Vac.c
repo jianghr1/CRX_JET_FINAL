@@ -96,6 +96,8 @@ void StartVacTask(void* arg) {
 			} else if (vac_working*(globalInfo.vac_pressure - globalInfo.target_pressure) > 0){
 				TMC_reset(TMC_VAC);
 			}
+		} else {
+			TMC_reset(TMC_VAC);
 		}
 	}
 }

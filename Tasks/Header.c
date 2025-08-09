@@ -38,7 +38,7 @@ void StartHeaderTask(void *argument) {
 				break;
 			}
 			case M121: {
-				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
+				if (currentIntCommandPtr->param1 & (-2)) {
 					if (currentIntCommandPtr->commandSource)
 						usb_printf("ERROR\n");
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);

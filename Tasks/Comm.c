@@ -176,6 +176,8 @@ void DecodeNumParam(GMCommand_t *procCommand) {
 		procCommand->numParams = 2;
 	} else if (procCommand->code >= 50 && procCommand->code <=70) {
 		procCommand->numParams = 0;
+	} else if (procCommand->code == M180) {
+		procCommand->numParams = 0;
 	} else {
 		procCommand->numParams = 3;
 	}

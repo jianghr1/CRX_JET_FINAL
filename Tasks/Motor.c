@@ -40,7 +40,7 @@ void StartMotorTask(void* arg) {
 				if (target_pos < 0 || target_pos > 220) {
 					if (currentIntCommandPtr->commandSource)
 						usb_printf("ERROR\n");
-				} else if (currentIntCommandPtr->param2 < 0 || currentIntCommandPtr->param2 > 30) {
+				} else if (currentIntCommandPtr->param2 < 0 || currentIntCommandPtr->param2 > 50) {
 					if (currentIntCommandPtr->commandSource)
 						usb_printf("ERROR\n");
 				} else {

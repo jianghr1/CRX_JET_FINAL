@@ -251,7 +251,7 @@ void StartDefaultTask(void *argument)
 			continue;
     } else {
 			HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDB_Pin, 1);
-			if (currentState == GlobalStateEStop || currentState == GlobalStateError && currentIntCommandPtr->code != M171) {
+			if ((currentState == GlobalStateEStop || currentState == GlobalStateError) && currentIntCommandPtr->code != M171) {
 				usb_printf("[Comm][Error] Emergency Stop or Error State, Command Ignored");
 				continue;
 			}
@@ -351,49 +351,49 @@ void StartDefaultTask(void *argument)
 			switch(currentIntCommandPtr->param1) {
 				case GlobalStateInit: {
 					if (currentState != GlobalStatePrint && currentState != GlobalStateClean) {
-						usb_printf("OK");
+						usb_printf("OK\n");
 						InitTask();
 					} else {
-						usb_printf("ERROR");
+						usb_printf("ERROR\n");
 					}
 					break;
 				}
 				case GlobalStatePOff: {
 					if (currentState == GlobalStateIdle) {
-						usb_printf("OK");
+						usb_printf("OK\n");
 						// TODO
 					} else {
-						usb_printf("ERROR");
+						usb_printf("ERROR\n");
 					}
 					break;
 				}
 				case GlobalStateClean: {
 					if (currentState == GlobalStateIdle) {
-						usb_printf("OK");
+						usb_printf("OK\n");
 						CleanTask(currentIntCommandPtr->param2);
 					} else {
-						usb_printf("ERROR");
+						usb_printf("ERROR\n");
 					}
 					break;
 				}
 				case GlobalStateEStop: {
-					usb_printf("OK");
+					usb_printf("OK\n");
 					break;
 				}
 				default:
-					usb_printf("ERROR");
+					usb_printf("ERROR\n");
 			}
 			osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 		} else if (currentIntCommandPtr->code == M172) {
 			if (currentState == GlobalStateIdle) {
-				usb_printf("OK");
+				usb_printf("OK\n");
 				PrintTaskPrepare();
 				PrintTask();
 			} else if (currentState == GlobalStatePause) {
-				usb_printf("OK");
+				usb_printf("OK\n");
 				PrintTask();
 			} else {
-				usb_printf("ERROR");
+				usb_printf("ERROR\n");
 			}
 		} else if (currentIntCommandPtr->code == M180) {
 			ReadFileList();

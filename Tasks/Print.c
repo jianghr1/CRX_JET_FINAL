@@ -223,7 +223,7 @@ void PrintTask(void) {
 		globalInfo.x_target_pos = zeropos_x;
 		command.code = G110;
 		command.param1 = 0;
-		command.param2 = 50;
+		command.param2 = 30;
 		command.param3 = 0;
 		currentIntCommandPtr = &command;
 		osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
