@@ -25,11 +25,29 @@ void StartHeaderTask(void *argument) {
 		switch(currentIntCommandPtr->code)
 		{
 			case M120: {
+				if (currentIntCommandPtr->param1 < 0 || currentIntCommandPtr->param1 > 100) {
+					usb_printf("ERROR");
+					break;
+				}
+				usb_printf("OK");
 				globalInfo.targetTemperature = currentIntCommandPtr->param1 * 10;
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case M121: {
+				if (currentIntCommandPtr->param1 != 0 || currentIntCommandPtr->param1 != 1) {
+					usb_printf("ERROR");
+					break;
+				}
+				if (currentIntCommandPtr->param2 < 1 || currentIntCommandPtr->param2 > 300) {
+					usb_printf("ERROR");
+					break;
+				}
+				if (currentIntCommandPtr->param3 < 0 || currentIntCommandPtr->param3 > 10000 || currentIntCommandPtr->param3 != (int)currentIntCommandPtr->param3) {
+					usb_printf("ERROR");
+					break;
+				}
+				usb_printf("OK");
 				jettingInfo.threadId = headerTaskHandle;
 				jetting.channel = currentIntCommandPtr->param1;
 				for (uint32_t i = 0; i < currentIntCommandPtr->param3; i++) {
@@ -46,6 +64,15 @@ void StartHeaderTask(void *argument) {
 				break;
 			}
 			case M122: {
+				if (currentIntCommandPtr->param1 < 0 || currentIntCommandPtr->param1 > 3) {
+					usb_printf("ERROR");
+					break;
+				}
+				if (currentIntCommandPtr->param2 < 17000 || currentIntCommandPtr->param2 > 19000) {
+					usb_printf("ERROR");
+					break;
+				}
+				usb_printf("OK");
 				VoltageR = currentIntCommandPtr->param2 * K + B;
 				switch (currentIntCommandPtr->param1)
 				{
