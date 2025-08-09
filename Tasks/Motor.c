@@ -4,7 +4,7 @@
 #include "Comm.h"
 #include "TMC2209.h"
 
-#define MOTOR_X_MM_TO_ESTEP 2.6525f
+#define MOTOR_X_MM_TO_ESTEP 2.502f
 #define MOTOR_Z_MM_TO_ESTEP 50.0f // 4mm per round
 #define MOTOR_X_HOME_DIRECTION +1
 #define MOTOR_Z_HOME_DIRECTION +1
@@ -36,12 +36,6 @@ void StartMotorTask(void* arg) {
 				TMC_wait_motor_stop(TMC_MX);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 
-				// osMutexAcquire(MUart1MutexHandle, osWaitForever);
-				// TMC_setSpeed(TMC_MX, MOTOR_X_MM_TO_ESTEP * currentIntCommandPtr->param2);
-				// TMC_move(TMC_MX, MOTOR_X_MM_TO_ESTEP * currentIntCommandPtr->param3 * MOTOR_X_MOVE_DIRECTION);
-				// osMutexRelease(MUart1MutexHandle);
-				// TMC_wait_motor_stop(TMC_MX);
-				// osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 				break;
 			}
 			case G111: {

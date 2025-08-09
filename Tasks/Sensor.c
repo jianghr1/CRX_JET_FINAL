@@ -109,7 +109,7 @@ void StartSensorTask(void *argument) {
 		globalInfo.trigger_state.bits.SW1 = !HAL_GPIO_ReadPin(SW1_GPIO_Port,      SW1_Pin     );
 		globalInfo.trigger_state.bits.SW2 = !HAL_GPIO_ReadPin(SW2_GPIO_Port,      SW2_Pin     );
 		globalInfo.trigger_state.bits.SW3 = !HAL_GPIO_ReadPin(SW3_GPIO_Port,      SW3_Pin     );
-		globalInfo.x_encoder_pos = (int16_t)htim3.Instance->CNT * 0.003329f;
+		globalInfo.x_encoder_pos = (int16_t)htim3.Instance->CNT * 0.035278f;
 		
 		if (globalInfo.temperature > -100 && globalInfo.temperature < 1000) {
 			int32_t error = globalInfo.targetTemperature - globalInfo.temperature;

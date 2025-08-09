@@ -8,6 +8,7 @@
 #include "math.h"
 #include "TMC2209.h"
 
+#define MOTOR_X_MM_TO_ESTEP 2.502f
 extern osThreadId_t defaultTaskHandle;
 extern osThreadId_t motorTaskHandle;
 extern osThreadId_t pumpTaskHandle;
@@ -227,12 +228,12 @@ void PrintTask(void) {
 		CHECK_STATE;
 		osDelay(500);
 		jettingInfo.threadId = defaultTaskHandle;
-		TMC_setSpeed(TMC_MX, 2.6525f * stepsize_x * 120);
-		float rcr_per_step = TMC_MX->stepDivision * 5.305f * stepsize_x;
+		TMC_setSpeed(TMC_MX, MOTOR_X_MM_TO_ESTEP * stepsize_x * 240);
+		float rcr_per_step = TMC_MX->stepDivision * MOTOR_X_MM_TO_ESTEP * stepsize_x * 2;
 		int32_t rcr_total = 0;
 		rcr_overwrite = rcr_per_step;
 		osThreadFlagsClear(MAIN_TASK_CPLT);
-		TMC_move(TMC_MX, - stepsize_x * 2.6525f * (size_x + AD_gap/stepsize_x));
+		TMC_move(TMC_MX, - stepsize_x * MOTOR_X_MM_TO_ESTEP * (size_x + AD_gap/stepsize_x));
 		for (x = 0; x < size_x + AD_gap/stepsize_x; x++) {
 			if (x==150) {
 				CHECK_STATE;
