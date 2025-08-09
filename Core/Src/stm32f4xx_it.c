@@ -516,7 +516,7 @@ void UART8_IRQHandler(void)
 		__HAL_UART_CLEAR_IDLEFLAG(&huart8);
 		HAL_UART_DMAStop(&huart8);
 		uint32_t data_length = 256 - __HAL_DMA_GET_COUNTER(&hdma_uart8_rx);
-		HAL_UART_Transmit_DMA(&huart8, decode_buffer, data_length);
+		//HAL_UART_Transmit_DMA(&huart8, decode_buffer, data_length);
 		DecodeCDC(decode_buffer, data_length);
 		HAL_UART_Receive_DMA(&huart8, decode_buffer, 256);
 	}
