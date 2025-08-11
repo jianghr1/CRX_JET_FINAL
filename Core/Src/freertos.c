@@ -217,7 +217,7 @@ void StartDefaultTask(void *argument)
 	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_SET);
 	osDelay(500);
 	uint8_t VoltageR=170;
-  HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 0);
+	HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 0);
 	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 0);
 	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 0);
 	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 0);
@@ -237,7 +237,7 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
 		// Wait For CDC Command
-    flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, 20);
+    	flag = osThreadFlagsWait(ALL_NEW_TASK|ALL_EMG_STOP, osFlagsWaitAny, 20);
 		// Emergemcy Stop Handling
 		if (currentState == GlobalStateEStop || currentState == GlobalStateError) {
 			HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDR_Pin, 0);
@@ -251,7 +251,7 @@ void StartDefaultTask(void *argument)
 			continue;
     } else {
 			HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDB_Pin, 1);
-			if ((currentState == GlobalStateEStop || currentState == GlobalStateError) && currentIntCommandPtr->code != M171) {
+			if ((currentState == GlobalStateEStop || currentState == GlobalStateError) && currentIntCommandPtr->code < M150) {
 				usb_printf("[Comm][Error] Emergency Stop or Error State, Command Ignored");
 				continue;
 			}
@@ -395,6 +395,7 @@ void StartDefaultTask(void *argument)
 			} else {
 				usb_printf("ERROR\n");
 			}
+			osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 		} else if (currentIntCommandPtr->code == M180) {
 			ReadFileList();
 			osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
