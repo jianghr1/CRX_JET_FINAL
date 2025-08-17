@@ -9,8 +9,8 @@ extern osThreadId_t headerTaskHandle;
 extern osThreadId_t jettingTaskHandle;
 extern SPI_HandleTypeDef hspi1, hspi4;
 extern TIM_HandleTypeDef htim9;
-float K = 9.5e-3f;
-float B = -5.0f;
+#define Voltage_K 9.5e-3f
+#define Voltage_B 5.0f
 void StartHeaderTask(void *argument) {
 	static uint8_t VoltageR;
 	static Jetting_t jetting;
@@ -92,7 +92,7 @@ void StartHeaderTask(void *argument) {
 				}
 				if (currentIntCommandPtr->commandSource)
 					usb_printf("OK\n");
-				VoltageR = currentIntCommandPtr->param2 * K + B;
+				VoltageR = currentIntCommandPtr->param2 * Voltage_K + Voltage_;
 				switch (currentIntCommandPtr->param1)
 				{
 					case 0: {
