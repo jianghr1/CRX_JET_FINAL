@@ -54,7 +54,20 @@ void StartVacTask(void* arg) {
 		Pressure_Read(&hi2c1);
 		if (vac_working)
 		{
-			if (globalInfo.target_pressure - globalInfo.vac_pressure > 200)
+			if (globalInfo.target_pressure - globalInfo.vac_pressure > 500)
+			{
+				// VAC conflict with Motor Z1 and Motor Z2
+				if (vac_working == -1) TMC_reset(TMC_VAC);
+				TMC_wait_motor_stop(TMC_MZ1);
+				TMC_wait_motor_stop(TMC_MZ2);
+				osMutexAcquire(MTim8MutexHandle, osWaitForever);
+				TMC_setSpeed(TMC_VAC, 360);
+				osMutexAcquire(MUart1MutexHandle, osWaitForever);
+				TMC_move(TMC_VAC, 200 * VAC_PRESSURE_DIRECTION);
+				vac_working = 1;
+				osMutexRelease(MUart1MutexHandle);
+				osMutexRelease(MTim8MutexHandle);
+			} else if (globalInfo.target_pressure - globalInfo.vac_pressure > 50)
 			{
 				// VAC conflict with Motor Z1 and Motor Z2
 				if (vac_working == -1) TMC_reset(TMC_VAC);
@@ -63,11 +76,11 @@ void StartVacTask(void* arg) {
 				osMutexAcquire(MTim8MutexHandle, osWaitForever);
 				TMC_setSpeed(TMC_VAC, 60);
 				osMutexAcquire(MUart1MutexHandle, osWaitForever);
-				TMC_move(TMC_VAC, 0xFFFF * VAC_PRESSURE_DIRECTION);
+				TMC_move(TMC_VAC, 20 * VAC_PRESSURE_DIRECTION);
 				vac_working = 1;
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
-			} else if (globalInfo.vac_pressure - globalInfo.target_pressure > 2000)
+			} else if (globalInfo.vac_pressure - globalInfo.target_pressure > 500)
 			{
 				// VAC conflict with Motor Z1 and Motor Z2
 				if (vac_working == 1) TMC_reset(TMC_VAC);
@@ -76,11 +89,11 @@ void StartVacTask(void* arg) {
 				osMutexAcquire(MTim8MutexHandle, osWaitForever);
 				TMC_setSpeed(TMC_VAC, 360);
 				osMutexAcquire(MUart1MutexHandle, osWaitForever);
-				TMC_move(TMC_VAC,-0xFFFF * VAC_PRESSURE_DIRECTION);
+				TMC_move(TMC_VAC,-200 * VAC_PRESSURE_DIRECTION);
 				vac_working = -1;
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
-			} else if (globalInfo.vac_pressure - globalInfo.target_pressure > 200)
+			} else if (globalInfo.vac_pressure - globalInfo.target_pressure > 50)
 			{
 				// VAC conflict with Motor Z1 and Motor Z2
 				if (vac_working == 1) TMC_reset(TMC_VAC);
@@ -89,7 +102,7 @@ void StartVacTask(void* arg) {
 				osMutexAcquire(MTim8MutexHandle, osWaitForever);
 				TMC_setSpeed(TMC_VAC, 60);
 				osMutexAcquire(MUart1MutexHandle, osWaitForever);
-				TMC_move(TMC_VAC,-0xFFFF * VAC_PRESSURE_DIRECTION);
+				TMC_move(TMC_VAC,-20 * VAC_PRESSURE_DIRECTION);
 				vac_working = -1;
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
