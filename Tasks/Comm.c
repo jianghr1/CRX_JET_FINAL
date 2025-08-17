@@ -131,10 +131,10 @@ void GlobalInit() {
 	// Power
 	osDelay(1500);
 	HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
-	// Heat
-	htim2.Instance->CCR1 = 0;
-	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-	// Light
+	// UV Light is at TIMER 2 CH2
+	htim2.Instance->CCR2 = 0;
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+	// HEATER is at TIMER 9 CH1
 	htim9.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
 	//TMC Init
