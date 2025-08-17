@@ -59,7 +59,7 @@ void StartMotorTask(void* arg) {
 			}
 			case G111: {
 				float target_pos = MOTOR_Z_MM_TO_ESTEP * currentIntCommandPtr->param3 * MOTOR_Z_MOVE_DIRECTION + TMC_MZ1->current_pos;
-				if (target_pos > 0 || target_pos < -50 * MOTOR_Z_MM_TO_ESTEP) {
+				if (target_pos > 0 || target_pos < -60 * MOTOR_Z_MM_TO_ESTEP) {
 					if (currentIntCommandPtr->commandSource)
 						usb_printf("ERROR\n");
 				} else if (currentIntCommandPtr->param2 < 0 || currentIntCommandPtr->param2 > 5) {
@@ -173,12 +173,12 @@ void StartMotorTask(void* arg) {
 				if (HAL_GPIO_ReadPin(MZ1_TRIG_GPIO_Port, MZ1_TRIG_Pin) == MOTOR_TRIGGERED_LVL)
 				{
 					triggerHandler.MZ1 = 0;
-					TMC_move(TMC_MZ1, - 10 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+					TMC_move(TMC_MZ1, - 3 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				}
 				if (HAL_GPIO_ReadPin(MZ2_TRIG_GPIO_Port, MZ2_TRIG_Pin) == MOTOR_TRIGGERED_LVL)
 				{
 					triggerHandler.MZ2 = 0;
-					TMC_move(TMC_MZ2, - 10 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+					TMC_move(TMC_MZ2, - 3 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				}
 				TMC_wait_motor_stop(TMC_MZ1);
 				CHECK_STATE;
@@ -187,6 +187,8 @@ void StartMotorTask(void* arg) {
 				osDelay(10);
 				triggerHandler.MZ1 = TMC_MZ1;
 				triggerHandler.MZ2 = TMC_MZ2;
+				TMC_setDirection(TMC_MZ1, MOTOR_Z_HOME_DIRECTION);
+				TMC_setDirection(TMC_MZ2, MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ1, MOTOR_Z_MM_TO_ESTEP * 100 * MOTOR_Z_HOME_DIRECTION);
 				TMC_move(TMC_MZ2, MOTOR_Z_MM_TO_ESTEP * 100 * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
@@ -213,12 +215,16 @@ void StartMotorTask(void* arg) {
 				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
 				CHECK_STATE;
-				TMC_move(TMC_MZ1, - 1 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
-				TMC_move(TMC_MZ2, - 1 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+				triggerHandler.MZ1 = 0;
+				triggerHandler.MZ2 = 0;
+				TMC_move(TMC_MZ1, 1 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+				TMC_move(TMC_MZ2, 1 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				TMC_wait_motor_stop(TMC_MZ1);
 				CHECK_STATE;
 				TMC_wait_motor_stop(TMC_MZ2);
 				CHECK_STATE;
+				TMC_reset(TMC_MZ1);
+				TMC_reset(TMC_MZ2);
 				osMutexRelease(MUart1MutexHandle);
 				osMutexRelease(MTim8MutexHandle);
 				osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
