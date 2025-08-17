@@ -18,6 +18,8 @@ void InitTask(void) {
 	osDelay(500);
 	GlobalInit();
 	HAL_GPIO_WritePin(LEDG_GPIO_Port, LEDG_Pin, 0);
+	// Set TargetTemperature to room temperature
+	globalInfo.targetTemperature=globalInfo.temperature;
 	osDelay(500);
 	// X zero
 	usb_printf("[Init][Info] X Zeroing\n");
@@ -64,7 +66,7 @@ void InitTask(void) {
 	CHECK_STATE;
 	// VAC Set Target
 	command.code = M105;
-	command.param1 = -800;
+	command.param1 = -1000;
 	currentIntCommandPtr = &command;
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
@@ -76,11 +78,18 @@ void InitTask(void) {
 	osThreadFlagsSet(vacTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
-	while(globalInfo.vac_pressure > -500) {
-		osDelay(500);
+	while(globalInfo.vac_pressure - globalInfo.target_pressure > 100) {
+		osDelay(1000);
 		CHECK_STATE;
+		usb_printf("[Init][Info] Waiting for VAC. Current Pressure %d, Target %d\n", globalInfo.vac_pressure, globalInfo.target_pressure);
 	}
 	usb_printf("[Init][Info] VAC Ready\n");
+	usb_printf("[Init][Info] Waiting Until Temperature Good\n");
+	while(globalInfo.targetTemperature - globalInfo.temperature > 10) {
+		osDelay(5000);
+		CHECK_STATE;
+		usb_printf("[Init][Info] Waiting for Temperature. Current Temperature %d, Target %d\n", globalInfo.temperature, globalInfo.targetTemperature);
+	}
 	// MS1 To Trigger
 	usb_printf("[Init][Info] MS1 Starting\n");
 	command.code = M100;
