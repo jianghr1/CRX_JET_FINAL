@@ -113,7 +113,7 @@ void StartSensorTask(void *argument) {
 		
 		if (globalInfo.temperature > -100 && globalInfo.temperature < 1000) {
 			int32_t error = globalInfo.targetTemperature - globalInfo.temperature;
-			if (error > 50) {
+			if (error > 1) {
 				htim9.Instance->CCR1=1000;
 				integeral = 0;
 			} else {
