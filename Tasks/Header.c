@@ -92,7 +92,7 @@ void StartHeaderTask(void *argument) {
 				}
 				if (currentIntCommandPtr->commandSource)
 					usb_printf("OK\n");
-				VoltageR = currentIntCommandPtr->param2 * Voltage_K + Voltage_;
+				VoltageR = currentIntCommandPtr->param2 * Voltage_K + Voltage_B;
 				switch (currentIntCommandPtr->param1)
 				{
 					case 0: {
