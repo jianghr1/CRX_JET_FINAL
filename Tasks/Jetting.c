@@ -67,6 +67,8 @@ void StartJettingTask(void *argument) {
 			if(HAL_UART_GetState(&huart7) != HAL_UART_STATE_READY) {
 				osThreadFlagsWait(JETTING_UART_CPLT, osFlagsWaitAny, 10);
 			}
+			jettingInfo.status = 0;
+			osThreadFlagsClear(JETTING_FPGA_REPLY);
 			if (HAL_UART_Transmit_DMA(&huart7, (uint8_t *)jettingInfo.data, 42) != HAL_OK) {
 				retry--;
 				continue;

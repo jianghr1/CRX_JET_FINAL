@@ -73,9 +73,9 @@ extern DMA_HandleTypeDef hdma_uart8_tx;
 extern UART_HandleTypeDef huart7;
 extern UART_HandleTypeDef huart8;
 extern TIM_HandleTypeDef htim7;
-extern osThreadId_t defaultTaskHandle;
 
 /* USER CODE BEGIN EV */
+extern osThreadId_t defaultTaskHandle;
 
 /* USER CODE END EV */
 
