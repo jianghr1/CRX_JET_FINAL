@@ -22,7 +22,7 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim8;
-extern TIM_HandleTypeDef htim9;
+extern TIM_HandleTypeDef htim10;
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi4;
 extern UART_HandleTypeDef huart8;
@@ -86,18 +86,20 @@ void EmergencyStop(GlobalState_t issue) {
 	// Forth: Trigger High Level Thread
 	osThreadFlagsSet(defaultTaskHandle, ALL_EMG_STOP);
 	// Finally: Disable All Device
-	// A: Valves
+	// VCOM
+	HAL_GPIO_WritePin(VCOM_EN_GPIO_Port, VCOM_EN_Pin, GPIO_PIN_RESET);
+	// Valves
 	HAL_GPIO_WritePin(MS1_CTL_GPIO_Port , MS1_CTL_Pin , GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(MS2_CTL_GPIO_Port , MS2_CTL_Pin , GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(VAC1_CTL_GPIO_Port, VAC1_CTL_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(VAC2_CTL_GPIO_Port, VAC2_CTL_Pin, GPIO_PIN_RESET);
-	// B: UV Lights
+	// UV Lights
 	HAL_GPIO_WritePin(UVF_CTL_GPIO_Port , UVF_CTL_Pin , GPIO_PIN_RESET);
 	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
 	// Heater
-	HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
-	HAL_TIM_PWM_Stop(&htim9, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim10, TIM_CHANNEL_1);
 	// Motors
+	HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
 	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Stop(&htim8, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Stop(&htim8, TIM_CHANNEL_2);
@@ -107,9 +109,13 @@ void EmergencyStop(GlobalState_t issue) {
 	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_2);
 	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_3);
 	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
+	// 37V
+	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_RESET);
 }
 
 void GlobalInit() {
+  // 37V
+	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_SET);
 	// Motors
 	htim1.Instance->CCR1 = 0;
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -128,15 +134,18 @@ void GlobalInit() {
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
 	htim4.Instance->CCR4 = 0;
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
+	// VCOM
+	osDelay(500);
+	HAL_GPIO_WritePin(VCOM_EN_GPIO_Port, VCOM_EN_Pin, GPIO_PIN_SET);
 	// Power
-	osDelay(1500);
+	osDelay(500);
 	HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
 	// UV Light is at TIMER 2 CH2
 	htim2.Instance->CCR2 = 0;
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 	// HEATER is at TIMER 9 CH1
-	htim9.Instance->CCR1 = 0;
-	HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
+	htim10.Instance->CCR1 = 0;
+	HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);
 	//TMC Init
 	osDelay(100);
 	TMC_init(TMC_MX , MRES_64);

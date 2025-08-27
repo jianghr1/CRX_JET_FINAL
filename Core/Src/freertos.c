@@ -55,9 +55,6 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
-extern SPI_HandleTypeDef hspi1;
-extern SPI_HandleTypeDef hspi4;
-
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -213,21 +210,6 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN StartDefaultTask */
 	uint32_t flag;
 	/* Global Init */
-  // 37V
-	HAL_GPIO_WritePin(EN37V_GPIO_Port, EN37V_Pin, GPIO_PIN_SET);
-	osDelay(500);
-	// 配置上电电压为18.0V
-	uint8_t VoltageR=180;
-	HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 0);
-	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 0);
-	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 0);
-	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 0);
-	HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
-	HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
-	HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 1);
-	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 1);
-	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 1);
-	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 1);
 	
 	triggerHandler.MX  = TMC_MX;
 	triggerHandler.MZ1 = TMC_MZ1;

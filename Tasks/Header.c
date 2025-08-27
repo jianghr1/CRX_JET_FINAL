@@ -7,8 +7,7 @@
 extern osThreadId_t defaultTaskHandle;
 extern osThreadId_t headerTaskHandle;
 extern osThreadId_t jettingTaskHandle;
-extern SPI_HandleTypeDef hspi1, hspi4;
-extern TIM_HandleTypeDef htim9;
+extern SPI_HandleTypeDef hspi4;
 #define Voltage_K 9.5e-3f
 #define Voltage_B 5.0f
 void StartHeaderTask(void *argument) {
@@ -109,13 +108,13 @@ void StartHeaderTask(void *argument) {
 					}
 					case 2: {
 						HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, GPIO_PIN_RESET);
-						HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
+						HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
 						HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, GPIO_PIN_SET);
 						break;
 					}
 					case 3: {
 						HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, GPIO_PIN_RESET);
-						HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
+						HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
 						HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, GPIO_PIN_SET);
 						break;
 					}

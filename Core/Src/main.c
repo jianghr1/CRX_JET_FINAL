@@ -101,7 +101,6 @@ int main(void)
   MX_DMA_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
-  MX_SPI1_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
@@ -112,9 +111,9 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_SPI4_Init();
   MX_TIM2_Init();
-  MX_TIM9_Init();
   MX_FATFS_Init();
   MX_UART8_Init();
+  MX_TIM10_Init();
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start_IT(&htim1);
 	HAL_TIM_Base_Start_IT(&htim4);
@@ -127,7 +126,6 @@ int main(void)
 	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 0);
 	HAL_GPIO_WritePin(VSEL_C_GPIO_Port, VSEL_C_Pin, 0);
 	HAL_GPIO_WritePin(VSEL_D_GPIO_Port, VSEL_D_Pin, 0);
-	HAL_SPI_Transmit(&hspi1, &VoltageR, 1, 10);
 	HAL_SPI_Transmit(&hspi4, &VoltageR, 1, 10);
 	HAL_GPIO_WritePin(VSEL_A_GPIO_Port, VSEL_A_Pin, 1);
 	HAL_GPIO_WritePin(VSEL_B_GPIO_Port, VSEL_B_Pin, 1);

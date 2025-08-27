@@ -9,7 +9,7 @@
 extern osThreadId_t jettingTaskHandle;
 extern ADC_HandleTypeDef hadc1;
 extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim9;
+extern TIM_HandleTypeDef htim10;
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	static uint32_t last_trigger_time_mx  = 0;
@@ -114,7 +114,7 @@ void StartSensorTask(void *argument) {
 		if (globalInfo.temperature > -100 && globalInfo.temperature < 1000) {
 			int32_t error = globalInfo.targetTemperature - globalInfo.temperature;
 			if (error > 1) {
-				htim9.Instance->CCR1=1000;
+				htim10.Instance->CCR1=1000;
 				integeral = 0;
 			} else {
 				if ((integeral ^ error)>>31) {
@@ -128,7 +128,7 @@ void StartSensorTask(void *argument) {
 				int32_t ccr = error * 5 + (integeral >> 2);
 				if (ccr > 800) ccr = 800;
 				if (ccr < 0) ccr = 0;
-				htim9.Instance->CCR1=ccr;
+				htim10.Instance->CCR1=ccr;
 			}
 		}
 		
