@@ -57,17 +57,19 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define ALL_NEW_TASK 4
+#define MAIN_TASK_CPLT 4
 #define JETTING_FPGA_REPLY 16
 #define ALL_EMG_STOP 1
 #define JETTING_UART_CPLT 8
-#define ALL_NEW_TASK 4
-#define MAIN_TASK_CPLT 4
-#define VSEL_A_Pin GPIO_PIN_3
-#define VSEL_A_GPIO_Port GPIOE
-#define VSEL_B_Pin GPIO_PIN_4
+#define HTR_CTL_TIM htim10
+#define HTR_CTL_CHN TIM_CHANNEL_1
+#define VSEL_B_Pin GPIO_PIN_3
 #define VSEL_B_GPIO_Port GPIOE
-#define HTR_CTL_Pin GPIO_PIN_5
-#define HTR_CTL_GPIO_Port GPIOE
+#define VSEL_C_Pin GPIO_PIN_4
+#define VSEL_C_GPIO_Port GPIOE
+#define VSEL_D_Pin GPIO_PIN_5
+#define VSEL_D_GPIO_Port GPIOE
 #define TH_FB_Pin GPIO_PIN_1
 #define TH_FB_GPIO_Port GPIOC
 #define MX_TRIG_Pin GPIO_PIN_1
@@ -79,10 +81,6 @@ void Error_Handler(void);
 #define MZ2_TRIG_Pin GPIO_PIN_3
 #define MZ2_TRIG_GPIO_Port GPIOA
 #define MZ2_TRIG_EXTI_IRQn EXTI3_IRQn
-#define VSEL_C_Pin GPIO_PIN_4
-#define VSEL_C_GPIO_Port GPIOA
-#define VSEL_D_Pin GPIO_PIN_6
-#define VSEL_D_GPIO_Port GPIOA
 #define MS1_YW_Pin GPIO_PIN_4
 #define MS1_YW_GPIO_Port GPIOC
 #define MS1_YW_EXTI_IRQn EXTI4_IRQn
@@ -129,6 +127,10 @@ void Error_Handler(void);
 #define LEDG_GPIO_Port GPIOA
 #define LEDB_Pin GPIO_PIN_12
 #define LEDB_GPIO_Port GPIOA
+#define MOTOR_EN_Pin GPIO_PIN_10
+#define MOTOR_EN_GPIO_Port GPIOC
+#define VCOM_EN_Pin GPIO_PIN_11
+#define VCOM_EN_GPIO_Port GPIOC
 #define SDIO_CD_Pin GPIO_PIN_0
 #define SDIO_CD_GPIO_Port GPIOD
 #define VAC1_CTL_Pin GPIO_PIN_3
@@ -143,8 +145,10 @@ void Error_Handler(void);
 #define UVF_CTL_GPIO_Port GPIOD
 #define UVL_CTL_Pin GPIO_PIN_3
 #define UVL_CTL_GPIO_Port GPIOB
-#define MOTOR_EN_Pin GPIO_PIN_8
-#define MOTOR_EN_GPIO_Port GPIOB
+#define HTR_CTL_Pin GPIO_PIN_8
+#define HTR_CTL_GPIO_Port GPIOB
+#define VSEL_A_Pin GPIO_PIN_9
+#define VSEL_A_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
