@@ -83,7 +83,7 @@ void StartHeaderTask(void *argument) {
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
 					break;
 				}
-				if (currentIntCommandPtr->param2 < 17000 || currentIntCommandPtr->param2 > 19000) {
+				if (currentIntCommandPtr->param2 < 17000 || currentIntCommandPtr->param2 > 20000) {
 					if (currentIntCommandPtr->commandSource)
 						usb_printf("ERROR\n");
 					osThreadFlagsSet(defaultTaskHandle, MAIN_TASK_CPLT);
