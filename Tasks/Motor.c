@@ -173,12 +173,12 @@ void StartMotorTask(void* arg) {
 				if (HAL_GPIO_ReadPin(MZ1_TRIG_GPIO_Port, MZ1_TRIG_Pin) == MOTOR_TRIGGERED_LVL)
 				{
 					triggerHandler.MZ1 = 0;
-					TMC_move(TMC_MZ1, - 3 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+					TMC_move(TMC_MZ1, - 5 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				}
 				if (HAL_GPIO_ReadPin(MZ2_TRIG_GPIO_Port, MZ2_TRIG_Pin) == MOTOR_TRIGGERED_LVL)
 				{
 					triggerHandler.MZ2 = 0;
-					TMC_move(TMC_MZ2, - 3 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
+					TMC_move(TMC_MZ2, - 5 * MOTOR_Z_MM_TO_ESTEP * MOTOR_Z_HOME_DIRECTION);
 				}
 				TMC_wait_motor_stop(TMC_MZ1);
 				CHECK_STATE;
