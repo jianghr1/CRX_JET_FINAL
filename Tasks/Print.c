@@ -211,6 +211,14 @@ void PrintTask(void) {
 	osThreadFlagsSet(headerTaskHandle, ALL_NEW_TASK);
 	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 	CHECK_STATE;
+	command.code = M141;
+	command.param1 = 1;
+	currentIntCommandPtr = &command;
+	osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+	osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+	CHECK_STATE;
+	while (globalInfo.temperature < 650)
+osDelay(100);
 	for (; z < size_z; z++) {
 		if (currentState & GlobalStatePauseReq) {
 			usb_printf("[Print][Info] Reciev Pause Command!\n");
@@ -230,6 +238,7 @@ void PrintTask(void) {
 		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 		CHECK_STATE;
 		osDelay(500);
+		usb_printf("[Print][Info] Printing\n");
 		jettingInfo.threadId = defaultTaskHandle;
 		TMC_setSpeed(TMC_MX, MOTOR_X_MM_TO_ESTEP * stepsize_x * 240);
 		float rcr_per_step = TMC_MX->stepDivision * MOTOR_X_MM_TO_ESTEP * stepsize_x * 2;
@@ -259,21 +268,21 @@ void PrintTask(void) {
 			}
 			if (posB > 0 && posB < size_x)
 			{
-				jettingInfo.data = (Jetting_t *)MS1_CH1_List[posB%MS1_CH2_BUFSIZE];
+				jettingInfo.data = (Jetting_t *)MS1_CH2_List[posB%MS1_CH2_BUFSIZE];
 				osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
 				osThreadFlagsWait(JETTING_FPGA_REPLY|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 				CHECK_STATE;
 			}
 			if (posC > 0 && posC < size_x)
 			{
-				jettingInfo.data = (Jetting_t *)MS1_CH1_List[posC%MS2_CH1_BUFSIZE];
+				jettingInfo.data = (Jetting_t *)MS2_CH1_List[posC%MS2_CH1_BUFSIZE];
 				osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
 				osThreadFlagsWait(JETTING_FPGA_REPLY|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 				CHECK_STATE;
 			}
 			if (posD > 0 && posD < size_x)
 			{
-				jettingInfo.data = (Jetting_t *)MS1_CH1_List[posD%MS2_CH2_BUFSIZE];
+				jettingInfo.data = (Jetting_t *)MS2_CH2_List[posD%MS2_CH2_BUFSIZE];
 				osThreadFlagsSet(jettingTaskHandle, ALL_NEW_TASK);
 				osThreadFlagsWait(JETTING_FPGA_REPLY|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
 				CHECK_STATE;
@@ -282,6 +291,31 @@ void PrintTask(void) {
 			rcr_overwrite = (rcr_per_step * (x + 2)) - rcr_total;
 		}
 		rcr_overwrite = 0;
+		
+		// Move To Ori Position
+		usb_printf("[Print][Info] UVLighting\n");
+		command.code = M140;
+		command.param1 = 3;
+		currentIntCommandPtr = &command;
+		osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+		CHECK_STATE;
+		globalInfo.x_target_pos = zeropos_x - 50;
+		command.code = G110;
+		command.param1 = 0;
+		command.param2 = 10;
+		command.param3 = 0;
+		currentIntCommandPtr = &command;
+		osThreadFlagsSet(motorTaskHandle, ALL_NEW_TASK);
+		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+		CHECK_STATE;
+		osDelay(500);
+		command.code = M140;
+		command.param1 = 0;
+		currentIntCommandPtr = &command;
+		osThreadFlagsSet(pumpTaskHandle, ALL_NEW_TASK);
+		osThreadFlagsWait(MAIN_TASK_CPLT|ALL_EMG_STOP, osFlagsWaitAny, osWaitForever);
+		CHECK_STATE;
 	}
 	
 	f_res = f_close(&myFile);
