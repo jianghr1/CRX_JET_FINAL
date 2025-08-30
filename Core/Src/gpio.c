@@ -81,7 +81,7 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pins : MX_TRIG_Pin MZ1_TRIG_Pin MZ2_TRIG_Pin */
   GPIO_InitStruct.Pin = MX_TRIG_Pin|MZ1_TRIG_Pin|MZ2_TRIG_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : MS1_YW_Pin MS2_YW_Pin */
@@ -93,7 +93,7 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pins : USB_DET1_Pin USB_DET2_Pin */
   GPIO_InitStruct.Pin = USB_DET1_Pin|USB_DET2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : EN37V_Pin */
@@ -131,7 +131,7 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pins : MOTOR_EN_Pin VCOM_EN_Pin */
   GPIO_InitStruct.Pin = MOTOR_EN_Pin|VCOM_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 

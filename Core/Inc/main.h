@@ -57,13 +57,11 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ALL_NEW_TASK 4
-#define MAIN_TASK_CPLT 4
 #define JETTING_FPGA_REPLY 16
 #define ALL_EMG_STOP 1
 #define JETTING_UART_CPLT 8
-#define HTR_CTL_TIM htim10
-#define HTR_CTL_CHN TIM_CHANNEL_1
+#define ALL_NEW_TASK 4
+#define MAIN_TASK_CPLT 4
 #define VSEL_B_Pin GPIO_PIN_3
 #define VSEL_B_GPIO_Port GPIOE
 #define VSEL_C_Pin GPIO_PIN_4
